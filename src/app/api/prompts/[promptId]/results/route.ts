@@ -5,10 +5,10 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { promptId: string } }
+  { params }: { params: Promise<{ promptId: string }> }
 ) {
   try {
-    const { promptId } = params;
+    const { promptId } = await params;
 
     if (!promptId) {
       return NextResponse.json(
@@ -17,17 +17,9 @@ export async function GET(
       );
     }
 
-    const results = await db
-      .select({
-        id: modelResults.id,
-        model: modelResults.model,
-        response: modelResults.response,
-        status: modelResults.status,
-        errorMessage: modelResults.errorMessage,
-        completedAt: modelResults.completedAt,
-      })
-      .from(modelResults)
-      .where(eq(modelResults.promptId, promptId));
+    const results = await db.query.modelResults.findMany({
+      where: eq(modelResults.promptId, promptId),
+    });
 
     return NextResponse.json({ results });
   } catch (error) {

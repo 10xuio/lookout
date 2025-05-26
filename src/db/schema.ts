@@ -9,6 +9,7 @@ import {
   pgEnum,
   unique,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -154,3 +155,26 @@ export const modelResults = pgTable(
     ),
   ]
 );
+
+export const topicsRelations = relations(topics, ({ many }) => ({
+  prompts: many(prompts),
+}));
+
+export const userRelations = relations(user, ({ many }) => ({
+  prompts: many(prompts),
+}));
+
+export const promptsRelations = relations(prompts, ({ many, one }) => ({
+  modelResults: many(modelResults),
+  topic: one(topics, {
+    fields: [prompts.topicId],
+    references: [topics.id],
+  }),
+}));
+
+export const modelResultsRelations = relations(modelResults, ({ one }) => ({
+  prompt: one(prompts, {
+    fields: [modelResults.promptId],
+    references: [prompts.id],
+  }),
+}));

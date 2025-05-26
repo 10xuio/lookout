@@ -28,7 +28,7 @@ export function PromptTableRow({ prompt }: PromptTableRowProps) {
       <TableCell>
         <PromptTags tags={prompt.tags} />
       </TableCell>
-      <TableCell>{prompt.geoRegion}</TableCell>
+      <TableCell>{prompt.geoRegion.toUpperCase()}</TableCell>
       <TableCell className="text-sm text-muted-foreground">
         {prompt.completedAt
           ? new Date(prompt.completedAt).toLocaleDateString()

@@ -7,16 +7,9 @@ import { revalidatePath } from "next/cache";
 
 export async function getTopics(): Promise<Topic[]> {
   try {
-    const topicsData = await db
-      .select({
-        id: topics.id,
-        name: topics.name,
-        description: topics.description,
-        logo: topics.logo,
-        isActive: topics.isActive,
-      })
-      .from(topics)
-      .orderBy(desc(topics.createdAt));
+    const topicsData = await db.query.topics.findMany({
+      orderBy: desc(topics.createdAt),
+    });
 
     return topicsData;
   } catch (error) {

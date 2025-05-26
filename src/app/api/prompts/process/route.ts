@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { prompts, modelResults, topics } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { prompts, modelResults } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { processPromptWithAllProviders } from "@/lib/llm";
 
 export async function POST(request: NextRequest) {
@@ -15,27 +15,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the prompt with its topic
-    const promptWithTopic = await db
-      .select({
-        prompt: prompts,
-        topic: topics,
-      })
-      .from(prompts)
-      .innerJoin(topics, eq(prompts.topicId, topics.id))
-      .where(and(eq(prompts.id, promptId), eq(prompts.status, "pending")))
-      .limit(1);
+    const prompt = await db.query.prompts.findFirst({
+      where: eq(prompts.id, promptId),
+      with: {
+        topic: true,
+      },
+    });
 
-    if (promptWithTopic.length === 0) {
+    if (!prompt) {
       return NextResponse.json(
         { error: "Prompt not found or not pending" },
         { status: 404 }
       );
     }
 
-    const { prompt, topic } = promptWithTopic[0];
-
-    // Update prompt status to processing
     await db
       .update(prompts)
       .set({
@@ -45,10 +38,9 @@ export async function POST(request: NextRequest) {
       .where(eq(prompts.id, promptId));
 
     try {
-      // Process with all providers
       const results = await processPromptWithAllProviders(
         prompt.content,
-        topic.name
+        prompt.topic.name
       );
 
       // Store results for each provider
@@ -62,7 +54,7 @@ export async function POST(request: NextRequest) {
             responseMetadata: result.metadata,
             status: result.error ? "failed" : "completed",
             errorMessage: result.error || null,
-            results: [], // We'll enhance this later to extract structured data
+            results: [],
             completedAt: new Date(),
           })
           .onConflictDoUpdate({
@@ -78,7 +70,6 @@ export async function POST(request: NextRequest) {
           });
       }
 
-      // Update prompt status to completed
       await db
         .update(prompts)
         .set({
@@ -94,7 +85,6 @@ export async function POST(request: NextRequest) {
         results: results.length,
       });
     } catch (processingError) {
-      // Update prompt status to failed
       await db
         .update(prompts)
         .set({

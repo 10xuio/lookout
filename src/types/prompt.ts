@@ -1,4 +1,4 @@
-import { prompts } from "@/db/schema";
+import { prompts, modelResults } from "@/db/schema";
 
 export type Prompt = Pick<
   typeof prompts.$inferSelect,
@@ -11,6 +11,7 @@ export type Prompt = Pick<
   | "status"
 > & {
   top: { name: string; logo?: string }[];
+  results: (typeof modelResults.$inferSelect)[];
 };
 
 export type Region =

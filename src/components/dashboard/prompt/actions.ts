@@ -1,37 +1,34 @@
 import { Prompt, Region } from "@/types/prompt";
 import { db } from "@/db";
-import { prompts, modelResults } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { prompts } from "@/db/schema";
 import { getUser } from "@/auth/server";
 import { revalidatePath } from "next/cache";
 
 export async function getPrompts(): Promise<Prompt[]> {
   try {
-    const promptsWithResults = await db
-      .select({
-        id: prompts.id,
-        content: prompts.content,
-        visibilityScore: prompts.visibilityScore,
-        tags: prompts.tags,
-        geoRegion: prompts.geoRegion,
-        completedAt: prompts.completedAt,
-        status: prompts.status,
-        results: modelResults.results,
-      })
-      .from(prompts)
-      .leftJoin(modelResults, eq(prompts.id, modelResults.promptId))
-      .orderBy(desc(prompts.createdAt));
+    const promptsWithResults = await db.query.prompts.findMany({
+      with: {
+        modelResults: true,
+      },
+    });
 
-    const transformedPrompts: Prompt[] = promptsWithResults.map((row) => ({
-      id: row.id,
-      content: row.content,
-      visibilityScore: row.visibilityScore,
-      tags: row.tags || [],
-      geoRegion: row.geoRegion,
-      completedAt: row.completedAt,
-      status: row.status,
-      top: row.results || [],
-    }));
+    const transformedPrompts: Prompt[] = promptsWithResults.map((prompt) => {
+      const allResults = prompt.modelResults.flatMap(
+        (result) => result.results ?? []
+      );
+
+      return {
+        id: prompt.id,
+        content: prompt.content,
+        visibilityScore: prompt.visibilityScore,
+        tags: prompt.tags || [],
+        geoRegion: prompt.geoRegion,
+        completedAt: prompt.completedAt,
+        status: prompt.status,
+        top: allResults,
+        results: prompt.modelResults,
+      };
+    });
 
     return transformedPrompts;
   } catch (error) {

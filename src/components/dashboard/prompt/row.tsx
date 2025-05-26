@@ -2,7 +2,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandList } from "@/components/brand-list";
 import { PromptTags } from "./tags";
-import { ProcessButton } from "./process";
+import { ProcessButton } from "./process-button";
 import { ResultsDialog } from "./results-dialog";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";

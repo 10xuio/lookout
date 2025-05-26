@@ -1,6 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
-import { anthropic } from "@ai-sdk/anthropic";
+import { Anthropic } from "@anthropic-ai/sdk";
 import { generateText } from "ai";
 
 export type LLMProvider = "openai" | "claude" | "google";
@@ -34,7 +34,13 @@ export async function processPromptWithOpenAI(
     const result = await generateText({
       model: openai("gpt-4o"),
       prompt: searchPrompt,
-      maxTokens: 1000,
+      tools: {
+        web_search_preview: openai.tools.webSearchPreview({
+          searchContextSize: "high",
+        }),
+      },
+      // Force web search tool:
+      toolChoice: { type: "tool", toolName: "web_search_preview" },
     });
 
     return {
@@ -63,7 +69,7 @@ export async function processPromptWithGoogle(
     const searchPrompt = createSearchPrompt(prompt, topicName);
 
     const result = await generateText({
-      model: google("gemini-1.5-pro", {
+      model: google("gemini-2.5-pro-preview-05-06", {
         useSearchGrounding: true,
       }),
       prompt: searchPrompt,
@@ -93,20 +99,44 @@ export async function processPromptWithClaude(
   topicName: string
 ): Promise<LLMResponse> {
   try {
+    const anthropic = new Anthropic();
     const searchPrompt = createSearchPrompt(prompt, topicName);
 
-    const result = await generateText({
-      model: anthropic("claude-3-5-sonnet-20241022"),
-      prompt: searchPrompt,
-      maxTokens: 1000,
+    const result = await anthropic.messages.create({
+      model: "claude-3-7-sonnet-latest",
+      messages: [
+        {
+          role: "user",
+          content: searchPrompt,
+        },
+      ],
+      max_tokens: 1000,
+      tools: [
+        {
+          type: "web_search_20250305",
+          name: "web_search",
+          max_uses: 5,
+        },
+      ],
     });
+
+    // Extract text content from Claude's response structure
+    let responseText = "";
+    if (result.content && Array.isArray(result.content)) {
+      responseText = result.content
+        .filter(
+          (block: { type: string; text?: string }) => block.type === "text"
+        )
+        .map((block: { type: string; text?: string }) => block.text || "")
+        .join(" ");
+    }
 
     return {
       provider: "claude",
-      response: result.text,
+      response: responseText,
       metadata: {
         usage: result.usage,
-        finishReason: result.finishReason,
+        finishReason: result.stop_reason,
       },
     };
   } catch (error) {

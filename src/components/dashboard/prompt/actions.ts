@@ -37,27 +37,6 @@ export async function getPrompts(): Promise<Prompt[]> {
   }
 }
 
-export async function processPrompt(promptId: string) {
-  try {
-    const response = await fetch("/api/prompts/process", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ promptId }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error ?? "Failed to process prompt");
-    }
-
-    revalidatePath("/dashboard/prompts");
-  } catch (error) {
-    console.error("Failed to process prompt:", error);
-  }
-}
-
 export interface CreatePromptData {
   content: string;
   topicId: string;

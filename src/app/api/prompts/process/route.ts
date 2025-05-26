@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { prompts, modelResults } from "@/db/schema";
+import { prompts } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { processPromptWithAllProviders } from "@/lib/llm";
+import { withTimeout } from "@/lib/timeout";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,12 +23,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (!prompt) {
+      return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
+    }
+
+    if (prompt.status === "processing") {
       return NextResponse.json(
-        { error: "Prompt not found or not pending" },
-        { status: 404 }
+        { error: "Prompt is already being processed" },
+        { status: 409 }
       );
     }
 
+    // Update status to processing immediately
     await db
       .update(prompts)
       .set({
@@ -37,17 +42,59 @@ export async function POST(request: NextRequest) {
       })
       .where(eq(prompts.id, promptId));
 
-    try {
-      const results = await processPromptWithAllProviders(
-        prompt.content,
-        prompt.topic.name
-      );
+    // Trigger background processing without waiting
+    processInBackground(promptId, prompt.content, prompt.topic.name);
 
-      for (const result of results) {
+    // Return immediately to the user
+    return NextResponse.json({
+      success: true,
+      message: "Prompt processing started",
+      promptId,
+      status: "processing",
+    });
+  } catch (error) {
+    console.error("API Error:", error);
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// Background processing function that runs independently
+async function processInBackground(
+  promptId: string,
+  content: string,
+  topicName: string
+) {
+  const startTime = Date.now();
+  console.log(`Starting background processing for prompt ${promptId}`);
+
+  try {
+    // Dynamic import to avoid loading heavy dependencies in the main request
+    const { processPromptWithAllProviders } = await import("@/lib/llm");
+    const { modelResults } = await import("@/db/schema");
+
+    console.log(`Processing prompt ${promptId} with all providers...`);
+    const results = await withTimeout(
+      processPromptWithAllProviders(content, topicName),
+      240000, // 4 minutes timeout
+      `Processing timeout for prompt ${promptId}`
+    );
+
+    let successCount = 0;
+    let failureCount = 0;
+
+    // Save results to database with individual error handling
+    for (const result of results) {
+      try {
         await db
           .insert(modelResults)
           .values({
-            promptId: prompt.id,
+            promptId,
             model: result.provider,
             response: result.response,
             responseMetadata: result.metadata,
@@ -67,23 +114,53 @@ export async function POST(request: NextRequest) {
               completedAt: new Date(),
             },
           });
+
+        if (result.error) {
+          failureCount++;
+          console.warn(
+            `Provider ${result.provider} failed for prompt ${promptId}: ${result.error}`
+          );
+        } else {
+          successCount++;
+          console.log(
+            `Provider ${result.provider} completed successfully for prompt ${promptId}`
+          );
+        }
+      } catch (dbError) {
+        failureCount++;
+        console.error(
+          `Database error saving result for provider ${result.provider}, prompt ${promptId}:`,
+          dbError
+        );
       }
+    }
 
-      await db
-        .update(prompts)
-        .set({
-          status: "completed",
-          completedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(prompts.id, promptId));
+    // Determine overall status based on results
+    const overallStatus = successCount > 0 ? "completed" : "failed";
 
-      return NextResponse.json({
-        success: true,
-        message: "Prompt processed successfully",
-        results: results.length,
-      });
-    } catch (processingError) {
+    // Update prompt status
+    await db
+      .update(prompts)
+      .set({
+        status: overallStatus,
+        completedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(prompts.id, promptId));
+
+    const duration = Date.now() - startTime;
+    console.log(
+      `Completed processing prompt ${promptId} in ${duration}ms. Success: ${successCount}, Failed: ${failureCount}`
+    );
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    console.error(
+      `Critical error processing prompt ${promptId} after ${duration}ms:`,
+      error
+    );
+
+    try {
+      // Update prompt status to failed
       await db
         .update(prompts)
         .set({
@@ -91,27 +168,11 @@ export async function POST(request: NextRequest) {
           updatedAt: new Date(),
         })
         .where(eq(prompts.id, promptId));
-
-      console.error("Error processing prompt:", processingError);
-      return NextResponse.json(
-        {
-          error: "Failed to process prompt",
-          details:
-            processingError instanceof Error
-              ? processingError.message
-              : "Unknown error",
-        },
-        { status: 500 }
+    } catch (dbError) {
+      console.error(
+        `Failed to update prompt status to failed for ${promptId}:`,
+        dbError
       );
     }
-  } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
   }
 }

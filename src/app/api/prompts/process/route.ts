@@ -43,7 +43,6 @@ export async function POST(request: NextRequest) {
         prompt.topic.name
       );
 
-      // Store results for each provider
       for (const result of results) {
         await db
           .insert(modelResults)

@@ -32,14 +32,13 @@ export async function processPromptWithOpenAI(
     const searchPrompt = createSearchPrompt(prompt, topicName);
 
     const result = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-4o-mini"),
       prompt: searchPrompt,
       tools: {
         web_search_preview: openai.tools.webSearchPreview({
           searchContextSize: "high",
         }),
       },
-      // Force web search tool:
       toolChoice: { type: "tool", toolName: "web_search_preview" },
     });
 
@@ -120,7 +119,6 @@ export async function processPromptWithClaude(
       ],
     });
 
-    // Extract text content from Claude's response structure
     let responseText = "";
     if (result.content && Array.isArray(result.content)) {
       responseText = result.content

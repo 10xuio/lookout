@@ -2,11 +2,12 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandList } from "@/components/brand-list";
 import { PromptTags } from "./tags";
-import { ProcessButton } from "./process-button";
+import { ProcessButton } from "./process";
 import { ResultsDialog } from "./results-dialog";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import type { Prompt } from "@/types/prompt";
+import { formatRelative, subDays } from "date-fns";
 
 interface PromptTableRowProps {
   prompt: Prompt;
@@ -31,7 +32,7 @@ export function PromptTableRow({ prompt }: PromptTableRowProps) {
       <TableCell>{prompt.geoRegion.toUpperCase()}</TableCell>
       <TableCell className="text-sm text-muted-foreground">
         {prompt.completedAt
-          ? new Date(prompt.completedAt).toLocaleDateString()
+          ? formatRelative(subDays(new Date(), 3), new Date(prompt.completedAt))
           : "Pending"}
       </TableCell>
       <TableCell>

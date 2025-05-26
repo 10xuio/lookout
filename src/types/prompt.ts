@@ -2,7 +2,13 @@ import { prompts } from "@/db/schema";
 
 export type Prompt = Pick<
   typeof prompts.$inferSelect,
-  "id" | "content" | "visibilityScore" | "tags" | "geoRegion" | "completedAt"
+  | "id"
+  | "content"
+  | "visibilityScore"
+  | "tags"
+  | "geoRegion"
+  | "completedAt"
+  | "status"
 > & {
   top: { name: string; logo?: string }[];
 };

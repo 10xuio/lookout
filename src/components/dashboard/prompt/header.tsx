@@ -7,6 +7,7 @@ import {
   Tags,
   Globe,
   Calendar,
+  Settings,
 } from "lucide-react";
 
 export function PromptsTableHeader() {
@@ -50,6 +51,12 @@ export function PromptsTableHeader() {
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Last Updated
+          </div>
+        </TableHead>
+        <TableHead>
+          <div className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Actions
           </div>
         </TableHead>
       </TableRow>

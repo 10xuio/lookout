@@ -35,6 +35,9 @@ export function PromptsTableSkeleton() {
           <TableCell>
             <Skeleton className="h-4 w-16" />
           </TableCell>
+          <TableCell>
+            <Skeleton className="h-8 w-20 rounded" />
+          </TableCell>
         </TableRow>
       ))}
     </TableBody>

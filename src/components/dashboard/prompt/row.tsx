@@ -2,6 +2,10 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandList } from "@/components/brand-list";
 import { PromptTags } from "./tags";
+import { ProcessButton } from "./process-button";
+import { ResultsDialog } from "./results-dialog";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 import type { Prompt } from "@/types/prompt";
 
 interface PromptTableRowProps {
@@ -29,6 +33,19 @@ export function PromptTableRow({ prompt }: PromptTableRowProps) {
         {prompt.completedAt
           ? new Date(prompt.completedAt).toLocaleDateString()
           : "Pending"}
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          <ProcessButton promptId={prompt.id} status={prompt.status} />
+          {prompt.status === "completed" && (
+            <ResultsDialog promptId={prompt.id} promptContent={prompt.content}>
+              <Button variant="outline" size="sm">
+                <Eye className="h-4 w-4 mr-2" />
+                View Results
+              </Button>
+            </ResultsDialog>
+          )}
+        </div>
       </TableCell>
     </TableRow>
   );

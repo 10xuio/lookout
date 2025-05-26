@@ -15,6 +15,7 @@ export async function getPrompts(): Promise<Prompt[]> {
         tags: prompts.tags,
         geoRegion: prompts.geoRegion,
         completedAt: prompts.completedAt,
+        status: prompts.status,
         results: modelResults.results,
       })
       .from(prompts)
@@ -28,6 +29,7 @@ export async function getPrompts(): Promise<Prompt[]> {
       tags: row.tags || [],
       geoRegion: row.geoRegion,
       completedAt: row.completedAt,
+      status: row.status,
       top: row.results || [],
     }));
 

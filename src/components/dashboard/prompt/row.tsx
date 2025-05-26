@@ -40,8 +40,7 @@ export function PromptTableRow({ prompt }: PromptTableRowProps) {
           {prompt.status === "completed" && (
             <ResultsDialog promptId={prompt.id} promptContent={prompt.content}>
               <Button variant="outline" size="sm">
-                <Eye className="h-4 w-4 mr-2" />
-                View Results
+                <Eye className="h-4 w-4" />
               </Button>
             </ResultsDialog>
           )}

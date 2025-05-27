@@ -107,8 +107,6 @@ export const status = pgEnum("prompt_status", [
   "cancelled",
 ]);
 
-export type modelStatus = "pending" | "processing" | "completed" | "failed";
-
 export const prompts = pgTable("prompts", {
   id: uuid("id").primaryKey().defaultRandom(),
   topicId: uuid("topic_id")

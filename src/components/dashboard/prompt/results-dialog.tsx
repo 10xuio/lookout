@@ -11,12 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { modelResults } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { Status } from "@/types/prompt";
 
 interface LLMResult {
   id: string;
   model: string;
   response: string | null;
-  status: string;
+  status: Status;
   errorMessage?: string | null;
   completedAt?: Date | null;
 }

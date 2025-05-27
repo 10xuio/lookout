@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Status } from "@/types/prompt";
 
 interface ProcessButtonProps {
   promptId: string;
-  status: string;
+  status: Status;
 }
 
 export function ProcessButton({ promptId, status }: ProcessButtonProps) {
@@ -50,12 +51,11 @@ export function ProcessButton({ promptId, status }: ProcessButtonProps) {
         body: JSON.stringify({ promptId }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error ?? "Failed to process prompt");
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Failed to process prompt");
+      }
       console.log(data.message);
     } catch (error) {
       console.error("Failed to process prompt:", error);

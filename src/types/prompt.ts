@@ -14,6 +14,13 @@ export type Prompt = Pick<
   results: (typeof modelResults.$inferSelect)[];
 };
 
+export type Status =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed"
+  | "cancelled";
+
 export type Region =
   | "global"
   | "us"

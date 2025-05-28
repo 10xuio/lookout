@@ -15,7 +15,7 @@ export default async function Page({
     <>
       <PromptBreadcrumb topicId={topicId} />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <PromptToolbar />
+        <PromptToolbar topicId={topicId} />
         <PromptsTable topicId={topicId} />
       </div>
     </>

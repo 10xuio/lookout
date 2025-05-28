@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Lightbulb } from "lucide-react";
 import { CreateTopicDialog } from "./create-dialog";
+import { TopicSuggestionsDialog } from "./suggestions-dialog";
 
 export function TopicsToolbar() {
   return (
@@ -11,6 +12,12 @@ export function TopicsToolbar() {
         <Input placeholder="Search by topic name" className="pl-9" />
       </div>
       <div className="flex items-center gap-2">
+        <TopicSuggestionsDialog>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Lightbulb className="h-4 w-4" />
+            Suggestions
+          </Button>
+        </TopicSuggestionsDialog>
         <CreateTopicDialog>
           <Button variant="default" size="sm" className="gap-2">
             <Plus className="h-4 w-4" />

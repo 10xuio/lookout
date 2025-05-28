@@ -4,7 +4,11 @@ import { Search, Plus, Lightbulb } from "lucide-react";
 import { CreatePromptDialog } from "./create-dialog";
 import { SuggestionsDialog } from "./suggestions-dialog";
 
-export function PromptToolbar() {
+interface PromptToolbarProps {
+  topicId?: string;
+}
+
+export function PromptToolbar({ topicId }: PromptToolbarProps) {
   return (
     <div className="flex items-center justify-between">
       <div className="relative min-w-xs">
@@ -18,7 +22,7 @@ export function PromptToolbar() {
             Add Prompt
           </Button>
         </CreatePromptDialog>
-        <SuggestionsDialog topicId="test">
+        <SuggestionsDialog topicId={topicId}>
           <Button variant="outline" size="sm" className="gap-2">
             <Lightbulb className="h-4 w-4" />
             Suggestions

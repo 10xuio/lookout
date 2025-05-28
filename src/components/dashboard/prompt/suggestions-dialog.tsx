@@ -34,8 +34,6 @@ interface SuggestionsDialogProps {
 async function fetchSuggestions(topicId?: string): Promise<PromptSuggestion[]> {
   "use server";
 
-  console.log("Fetching AI-generated suggestions for topic:", topicId);
-
   try {
     if (topicId) {
       // Get topic details to provide context
@@ -122,9 +120,7 @@ async function TopicSelectionStep() {
     if (selectedTopicId) {
       // Redirect to the same page with the selected topic
       const { redirect } = await import("next/navigation");
-      redirect(
-        `/dashboard/prompts?topicId=${selectedTopicId}&showSuggestions=true`
-      );
+      redirect(`/dashboard/prompts?topicId=${selectedTopicId}`);
     }
   }
 
@@ -192,7 +188,6 @@ async function SuggestionsList({ topicId }: { topicId?: string }) {
 
   async function handleAccept(suggestion: PromptSuggestion) {
     "use server";
-    console.log("Accepted suggestion:", suggestion.id);
 
     try {
       if (!topicId) {
@@ -207,7 +202,6 @@ async function SuggestionsList({ topicId }: { topicId?: string }) {
       });
 
       if (result.success) {
-        console.log("Prompt created successfully:", result.promptId);
         revalidatePath("/dashboard/prompts");
       } else {
         console.error("Failed to create prompt:", result.error);

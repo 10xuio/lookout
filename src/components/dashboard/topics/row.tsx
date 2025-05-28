@@ -1,5 +1,8 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
+import Link from "next/link";
 import type { Topic } from "@/types/topic";
 import { ImageAvatar } from "@/components/brand-list";
 import { DeleteButton } from "./delete-button";
@@ -31,9 +34,22 @@ export function TopicTableRow({ topic }: TopicTableRowProps) {
       </TableCell>
       <TableCell>{topic.isActive ? "Active" : "Inactive"}</TableCell>
       <TableCell>
-        <form action={handleDelete}>
-          <DeleteButton />
-        </form>
+        <div className="flex items-center gap-2">
+          <Link href={`/dashboard/prompts?topicId=${topic.id}`}>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Eye className="h-4 w-4" />
+              View Prompts
+              {topic.promptCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
+                  {topic.promptCount}
+                </span>
+              )}
+            </Button>
+          </Link>
+          <form action={handleDelete}>
+            <DeleteButton />
+          </form>
+        </div>
       </TableCell>
     </TableRow>
   );

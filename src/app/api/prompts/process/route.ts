@@ -75,7 +75,6 @@ async function processInBackground(
   topicName: string
 ) {
   const startTime = Date.now();
-  console.log(`Processing prompt ${promptId}`);
 
   try {
     const [{ processPromptWithAllProviders }, { modelResults }] =

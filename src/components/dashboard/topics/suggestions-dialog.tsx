@@ -23,8 +23,6 @@ interface TopicSuggestionsDialogProps {
 async function fetchTopicSuggestions(): Promise<TopicSuggestion[]> {
   "use server";
 
-  console.log("Fetching AI-generated topic suggestions");
-
   try {
     return await generateTopicSuggestions();
   } catch (error) {
@@ -88,7 +86,6 @@ async function TopicSuggestionsList() {
 
   async function handleAccept(suggestion: TopicSuggestion) {
     "use server";
-    console.log("Accepted topic suggestion:", suggestion.name);
 
     try {
       // Create topic using the suggestion name

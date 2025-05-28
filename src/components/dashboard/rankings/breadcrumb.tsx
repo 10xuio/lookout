@@ -11,7 +11,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { TopicSelector, TopicSelectorSkeleton } from "./topic-selector";
 import { getTopics } from "../topics/actions";
 
-async function TopicSelectorWrapper({ topicId }: { topicId?: string }) {
+export async function TopicSelectorWrapper({ topicId }: { topicId?: string }) {
   const topics = await getTopics();
   return <TopicSelector topics={topics} currentTopicId={topicId} />;
 }

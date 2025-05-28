@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { TopicSelectorWrapper } from "../breadcrumb";
+import { Suspense } from "react";
+import { TopicSelectorSkeleton } from "../topic-selector";
 
 export function ResultsBreadcrumb({ topicId }: { topicId?: string }) {
   return (
@@ -20,6 +23,12 @@ export function ResultsBreadcrumb({ topicId }: { topicId?: string }) {
         />
         <Breadcrumb>
           <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <Suspense fallback={<TopicSelectorSkeleton />}>
+                <TopicSelectorWrapper topicId={topicId} />
+              </Suspense>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
               <BreadcrumbLink
                 href={`/dashboard/rankings${

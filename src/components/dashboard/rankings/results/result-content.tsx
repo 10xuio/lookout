@@ -1,15 +1,5 @@
 import { notFound } from "next/navigation";
-import {
-  Calendar,
-  Globe,
-  Hash,
-  Bot,
-  AlertCircle,
-  Clock,
-  ArrowLeft,
-} from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Calendar, Globe, Hash, Bot, AlertCircle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -19,7 +9,6 @@ import {
   CardDescription,
   CardAction,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 import { db } from "@/db";
 import { prompts } from "@/db/schema";
@@ -86,13 +75,7 @@ function parseVisibilityScore(score: string | null | undefined): number {
   return isNaN(parsed) ? 0 : Math.max(0, Math.min(100, parsed));
 }
 
-export async function ResultsContent({
-  promptId,
-  topicId,
-}: {
-  promptId: string;
-  topicId?: string;
-}) {
+export async function ResultsContent({ promptId }: { promptId: string }) {
   const prompt = await getPromptWithResults(promptId);
 
   if (!prompt) {
@@ -103,26 +86,9 @@ export async function ResultsContent({
 
   return (
     <div className="space-y-6">
-      <ResultsHeader topicId={topicId} />
+      <h1 className="text-2xl font-bold">Ranking Results</h1>
       <PromptSummaryCard prompt={prompt} visibilityScore={visibilityScore} />
       <ModelResultsList modelResults={prompt.modelResults} />
-    </div>
-  );
-}
-
-function ResultsHeader({ topicId }: { topicId?: string }) {
-  const backUrl = `/dashboard/rankings${topicId ? `?topicId=${topicId}` : ""}`;
-
-  return (
-    <div className="flex items-center gap-4">
-      <Link href={backUrl}>
-        <Button variant="outline" size="sm" className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Go Back
-        </Button>
-      </Link>
-      <Separator orientation="vertical" className="h-6" />
-      <h1 className="text-2xl font-bold">Ranking Results</h1>
     </div>
   );
 }

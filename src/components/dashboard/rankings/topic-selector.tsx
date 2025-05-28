@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { SquareDashed } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -16,38 +16,22 @@ interface TopicSelectorProps {
 }
 
 export function TopicSelectorSkeleton() {
-  return (
-    <div className="flex items-center gap-2 w-28">
-      <Skeleton className="w-6.5 h-6.5 rounded" />
-      <Skeleton className="flex-1 h-6 rounded" />
-    </div>
-  );
+  return <Skeleton className="w-6.5 h-6.5 rounded" />;
 }
 
-export function TopicSelector({
-  topics,
-  currentTopicId,
-  placeholder = "Select a topic",
-}: TopicSelectorProps) {
+export function TopicSelector({ topics, currentTopicId }: TopicSelectorProps) {
   const selectedTopic = topics.find((topic) => topic.id === currentTopicId);
 
   return (
     <Popover>
-      <PopoverTrigger className="flex items-center gap-1 w-28">
-        {selectedTopic ? (
-          <div className="flex items-center gap-2">
-            {selectedTopic.logo && (
-              <ImageAvatar
-                url={selectedTopic.logo}
-                title={selectedTopic.name}
-              />
-            )}
-            <span className="truncate">{selectedTopic.name}</span>
-          </div>
+      <PopoverTrigger className="flex items-center gap-1">
+        {selectedTopic?.logo ? (
+          <ImageAvatar url={selectedTopic.logo} title={selectedTopic.name} />
         ) : (
-          <span className="text-muted-foreground truncate">{placeholder}</span>
+          <span className="bg-muted-foreground/10 rounded w-6.5 h-6.5 flex border border-border items-center justify-center">
+            <SquareDashed className="h-4 w-4 text-muted-foreground" />
+          </span>
         )}
-        <ChevronDown className="h-4 w-4 opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="p-0 w-40" align="start">
         <div className="max-h-[300px] overflow-y-auto">

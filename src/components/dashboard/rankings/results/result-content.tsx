@@ -113,10 +113,6 @@ function PromptSummaryCard({
           </CardTitle>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
-              <span className="font-medium">Topic:</span>
-              <span>{prompt.topic?.name || "No topic"}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
               <Globe className="h-4 w-4" />
               <span>{prompt.geoRegion.toUpperCase()}</span>
             </div>

@@ -43,7 +43,7 @@ export function PromptsTableHeader() {
         <TableHead>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Last Updated
+            Completed
           </div>
         </TableHead>
         <TableHead>

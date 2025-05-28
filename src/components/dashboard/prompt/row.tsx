@@ -49,7 +49,7 @@ export function PromptTableRow({ prompt }: PromptTableRowProps) {
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">
         {prompt.completedAt
-          ? formatRelative(new Date(), new Date(prompt.completedAt))
+          ? formatRelative(new Date(prompt.completedAt), new Date())
           : "Pending"}
       </TableCell>
       <TableCell>

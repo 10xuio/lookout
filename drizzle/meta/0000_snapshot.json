@@ -93,12 +93,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -194,12 +190,8 @@
           "name": "prompt_results_prompt_id_prompts_id_fk",
           "tableFrom": "prompt_results",
           "tableTo": "prompts",
-          "columnsFrom": [
-            "prompt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["prompt_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -209,10 +201,7 @@
         "ai_model_results_prompt_model_unique": {
           "name": "ai_model_results_prompt_model_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "prompt_id",
-            "model"
-          ]
+          "columns": ["prompt_id", "model"]
         }
       },
       "policies": {},
@@ -311,12 +300,8 @@
           "name": "prompts_topic_id_topics_id_fk",
           "tableFrom": "prompts",
           "tableTo": "topics",
-          "columnsFrom": [
-            "topic_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["topic_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -324,12 +309,8 @@
           "name": "prompts_user_id_user_id_fk",
           "tableFrom": "prompts",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -399,12 +380,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -414,9 +391,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -486,12 +461,8 @@
           "name": "topics_user_id_user_id_fk",
           "tableFrom": "topics",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -556,9 +527,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -639,22 +608,12 @@
     "public.model": {
       "name": "model",
       "schema": "public",
-      "values": [
-        "openai",
-        "claude",
-        "google"
-      ]
+      "values": ["openai", "claude", "google"]
     },
     "public.prompt_status": {
       "name": "prompt_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "processing",
-        "completed",
-        "failed",
-        "cancelled"
-      ]
+      "values": ["pending", "processing", "completed", "failed", "cancelled"]
     }
   },
   "schemas": {},

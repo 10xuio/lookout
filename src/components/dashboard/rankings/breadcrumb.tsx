@@ -34,7 +34,7 @@ export function PromptBreadcrumb({ topicId }: { topicId?: string }) {
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
-              <BreadcrumbPage>Prompts</BreadcrumbPage>
+              <BreadcrumbPage>Rankings</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

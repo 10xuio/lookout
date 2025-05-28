@@ -79,7 +79,7 @@ async function fetchSuggestions(topicId?: string): Promise<PromptSuggestion[]> {
       if (topic) {
         const suggestions = await generatePromptSuggestions(
           topic.name,
-          topic.description || undefined
+          topic.description ?? undefined
         );
 
         if (Array.isArray(suggestions) && suggestions.length > 0) {

@@ -57,11 +57,7 @@ export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
         <div className="flex gap-2">
           <ProcessButton promptId={prompt.id} status={prompt.status} />
           {prompt.status === "completed" && (
-            <Link
-              href={`/dashboard/rankings/${prompt.id}/results${
-                topicId ? `?topicId=${topicId}` : ""
-              }`}
-            >
+            <Link href={`/dashboard/rankings/${topicId}/${prompt.id}/results`}>
               <Button variant="outline" size="sm" className="gap-2">
                 <Eye className="h-4 w-4" />
                 View Results

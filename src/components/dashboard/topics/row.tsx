@@ -35,7 +35,7 @@ export function TopicTableRow({ topic }: TopicTableRowProps) {
       <TableCell>{topic.isActive ? "Active" : "Inactive"}</TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          <Link href={`/dashboard/rankings?topicId=${topic.id}`}>
+          <Link href={`/dashboard/rankings/${topic.id}`}>
             <Button variant="outline" size="sm" className="gap-2">
               <Eye className="h-4 w-4" />
               View Rankings

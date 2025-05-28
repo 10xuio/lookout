@@ -169,9 +169,7 @@ async function TopicSelectionStep() {
       const selectedTopicId = formData.get("topicId");
 
       if (typeof selectedTopicId === "string" && selectedTopicId.trim()) {
-        redirect(
-          `/dashboard/rankings?topicId=${encodeURIComponent(selectedTopicId)}`
-        );
+        redirect(`/dashboard/rankings/${encodeURIComponent(selectedTopicId)}`);
       }
     } catch (error) {
       console.error("Failed to handle topic selection:", error);

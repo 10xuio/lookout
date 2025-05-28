@@ -59,7 +59,7 @@ export function TopicSelector({
             topics.map((topic) => (
               <Link
                 key={topic.id}
-                href={`?topicId=${topic.id}`}
+                href={`/dashboard/rankings/${topic.id}`}
                 prefetch={false}
                 className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors border-b last:border-b-0"
               >

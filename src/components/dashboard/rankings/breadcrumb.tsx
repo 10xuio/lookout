@@ -10,13 +10,20 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { TopicSelector, TopicSelectorSkeleton } from "./topic-selector";
 import { getTopics } from "../topics/actions";
+import Link from "next/link";
 
 export async function TopicSelectorWrapper({ topicId }: { topicId?: string }) {
   const topics = await getTopics();
   return <TopicSelector topics={topics} currentTopicId={topicId} />;
 }
 
-export function PromptBreadcrumb({ topicId }: { topicId?: string }) {
+export function PromptBreadcrumb({
+  topicId,
+  page,
+}: {
+  topicId?: string;
+  page: "rankings" | "results";
+}) {
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4">
@@ -34,8 +41,20 @@ export function PromptBreadcrumb({ topicId }: { topicId?: string }) {
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
-              <BreadcrumbPage>Rankings</BreadcrumbPage>
+              {page === "rankings" ? (
+                <BreadcrumbPage>Rankings</BreadcrumbPage>
+              ) : (
+                <Link href={`/dashboard/rankings/${topicId}`}>Rankings</Link>
+              )}
             </BreadcrumbItem>
+            {page === "results" && (
+              <>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Results</BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            )}
           </BreadcrumbList>
         </Breadcrumb>
       </div>

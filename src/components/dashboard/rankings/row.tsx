@@ -43,7 +43,7 @@ export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
         </div>
       </TableCell>
       <TableCell>
-        <BrandList top={prompt.top} />
+        <BrandList top={prompt.top ?? []} />
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">
         {prompt.geoRegion.toUpperCase()}
@@ -58,7 +58,7 @@ export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
           <ProcessButton promptId={prompt.id} status={prompt.status} />
           {prompt.status === "completed" && (
             <Link
-              href={`/dashboard/prompts/${prompt.id}/results${
+              href={`/dashboard/rankings/${prompt.id}/results${
                 topicId ? `?topicId=${topicId}` : ""
               }`}
             >

@@ -30,27 +30,15 @@ export async function getTopics(): Promise<Topic[]> {
   if (!user) throw new Error("User not found");
 
   try {
-    const topicsData = await db.query.topics.findMany({
+    const res = await db.query.topics.findMany({
       where: eq(topics.userId, user.id),
       orderBy: desc(topics.createdAt),
       with: {
-        prompts: {
-          columns: {
-            id: true,
-          },
-        },
+        prompts: true,
       },
     });
 
-    // Transform the data to include prompt count
-    return topicsData.map((topic) => ({
-      id: topic.id,
-      name: topic.name,
-      description: topic.description,
-      logo: topic.logo,
-      isActive: topic.isActive,
-      promptCount: topic.prompts.length,
-    }));
+    return res;
   } catch (error) {
     console.error("Failed to fetch topics:", error);
     return [];

@@ -1,5 +1,6 @@
 import { prompts, modelResults } from "@/db/schema";
 import { SearchResult } from "@/lib/llm";
+import { Topic } from "./topic";
 
 export type LLMResult = Pick<
   typeof modelResults.$inferSelect,
@@ -26,8 +27,9 @@ export type Prompt = Pick<
   | "completedAt"
   | "status"
 > & {
-  top: SearchResult[];
-  results: LLMResult[];
+  top?: SearchResult[];
+  topic?: Topic;
+  modelResults?: LLMResult[];
 };
 
 export type Status =

@@ -17,9 +17,9 @@ const staticNavMain = [
     url: "/dashboard/topics",
   },
   {
-    title: "Prompts",
+    title: "Rankings",
     icon: Bot,
-    url: "/dashboard/prompts",
+    url: "/dashboard/rankings",
   },
   {
     title: "Competitors",

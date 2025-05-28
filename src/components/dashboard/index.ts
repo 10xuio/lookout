@@ -1,8 +1,8 @@
-export { PromptToolbar } from "./prompt/toolbar";
-export { PromptBreadcrumb } from "./prompt/breadcrumb";
-export { PromptsTable } from "./prompt/table";
-export { PromptTableRow } from "./prompt/row";
-export { PromptTags } from "./prompt/tags";
+export { PromptToolbar } from "./rankings/toolbar";
+export { PromptBreadcrumb } from "./rankings/breadcrumb";
+export { PromptsTable } from "./rankings/table";
+export { PromptTableRow } from "./rankings/row";
+export { PromptTags } from "./rankings/tags";
 
 export { TopicsTable } from "./topics/table";
 export { TopicTableRow } from "./topics/row";

@@ -14,7 +14,7 @@ export async function deletePrompt(promptId: string) {
       .delete(prompts)
       .where(and(eq(prompts.id, promptId), eq(prompts.userId, user.id)));
 
-    revalidatePath("/dashboard/prompts");
+    revalidatePath("/dashboard/rankings");
   } catch (error) {
     console.error("Failed to delete prompt:", error);
     return {
@@ -53,7 +53,7 @@ export async function getPrompts(topicId?: string): Promise<Prompt[]> {
         completedAt: prompt.completedAt,
         status: prompt.status,
         top: allResults,
-        results: prompt.modelResults,
+        modelResults: prompt.modelResults,
       };
     });
 

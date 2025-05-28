@@ -35,15 +35,10 @@ export function TopicTableRow({ topic }: TopicTableRowProps) {
       <TableCell>{topic.isActive ? "Active" : "Inactive"}</TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          <Link href={`/dashboard/prompts?topicId=${topic.id}`}>
+          <Link href={`/dashboard/rankings?topicId=${topic.id}`}>
             <Button variant="outline" size="sm" className="gap-2">
               <Eye className="h-4 w-4" />
-              View Prompts
-              {topic.promptCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
-                  {topic.promptCount}
-                </span>
-              )}
+              View Rankings
             </Button>
           </Link>
           <form action={handleDelete}>

@@ -202,7 +202,7 @@ async function SuggestionsList({ topicId }: { topicId?: string }) {
       });
 
       if (result.success) {
-        revalidatePath("/dashboard/prompts");
+        revalidatePath("/dashboard/rankings");
       } else {
         console.error("Failed to create prompt:", result.error);
       }

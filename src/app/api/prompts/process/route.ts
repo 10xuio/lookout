@@ -94,6 +94,10 @@ async function processInBackground(
       status: result.error ? "failed" : ("completed" as Status),
       errorMessage: result.error ?? null,
       results: result.response,
+      sources: result.sources || [],
+      citations: result.citations || [],
+      searchQueries: result.searchQueries || [],
+      groundingMetadata: result.groundingMetadata || {},
       completedAt: new Date(),
     }));
 
@@ -109,6 +113,11 @@ async function processInBackground(
               responseMetadata: operation.responseMetadata,
               status: operation.status,
               errorMessage: operation.errorMessage,
+              results: operation.results,
+              sources: operation.sources,
+              citations: operation.citations,
+              searchQueries: operation.searchQueries,
+              groundingMetadata: operation.groundingMetadata,
               updatedAt: new Date(),
               completedAt: operation.completedAt,
             },

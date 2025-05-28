@@ -8,6 +8,13 @@
       "when": 1748249043801,
       "tag": "0000_wide_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1748433403996,
+      "tag": "0001_safe_goliath",
+      "breakpoints": true
     }
   ]
 }

@@ -2,9 +2,9 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandList } from "@/components/brand-list";
 import { ProcessButton } from "./process-button";
-import { ResultsDialog } from "./results-dialog";
 import { Button } from "@/components/ui/button";
 import { Eye, Hash } from "lucide-react";
+import Link from "next/link";
 import type { Prompt } from "@/types/prompt";
 import { formatRelative } from "date-fns";
 import { deletePrompt } from "./actions";
@@ -13,9 +13,10 @@ import { cn, getVisibilityScoreColor } from "@/lib/utils";
 
 interface PromptTableRowProps {
   prompt: Prompt;
+  topicId?: string;
 }
 
-export function PromptTableRow({ prompt }: PromptTableRowProps) {
+export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
   const handleDelete = async () => {
     "use server";
     await deletePrompt(prompt.id);
@@ -56,11 +57,16 @@ export function PromptTableRow({ prompt }: PromptTableRowProps) {
         <div className="flex gap-2">
           <ProcessButton promptId={prompt.id} status={prompt.status} />
           {prompt.status === "completed" && (
-            <ResultsDialog promptId={prompt.id} promptContent={prompt.content}>
-              <Button variant="outline" size="sm">
+            <Link
+              href={`/dashboard/prompts/${prompt.id}/results${
+                topicId ? `?topicId=${topicId}` : ""
+              }`}
+            >
+              <Button variant="outline" size="sm" className="gap-2">
                 <Eye className="h-4 w-4" />
+                View Results
               </Button>
-            </ResultsDialog>
+            </Link>
           )}
           <form action={handleDelete}>
             <DeleteButton />

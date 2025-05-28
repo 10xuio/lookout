@@ -6,11 +6,54 @@ import { z } from "zod";
 
 export type LLMProvider = "openai" | "claude" | "google";
 
+// Enhanced source schema with additional metadata
+export const sourceSchema = z.object({
+  title: z.string().describe("Title of the source"),
+  url: z.string().describe("URL of the source"),
+  snippet: z.string().describe("Snippet about the source"),
+  domain: z.string().optional().describe("Domain of the source"),
+  publishedDate: z.string().optional().describe("Published date if available"),
+  confidence: z
+    .number()
+    .optional()
+    .describe("Confidence score for this source"),
+});
+
+// Enhanced search result schema
+const resultSchema = z.object({
+  title: z.string().describe("Title of the brand/topic"),
+  url: z
+    .string()
+    .describe(
+      "URL of the brand/topic it must be a top level domain and not a subdomain or a path"
+    ),
+  snippet: z
+    .string()
+    .describe(
+      "Snippet about the brand/topic in 100 words MAXIMUM based on the prompt and the search results"
+    ),
+});
+
+const searchResultsSchema = z.array(resultSchema);
+
+export type SearchResult = z.infer<typeof resultSchema>;
+export type Source = z.infer<typeof sourceSchema>;
+
+// Enhanced LLM response interface
 export interface LLMResponse {
   provider: LLMProvider;
   response: SearchResult[];
   metadata: Record<string, unknown>;
   error?: string;
+  // Enhanced fields for sources and citations
+  sources?: Source[];
+  citations?: Array<{
+    text: string;
+    sourceIndices: number[];
+    confidence?: number;
+  }>;
+  searchQueries?: string[];
+  groundingMetadata?: Record<string, unknown>;
 }
 
 const schemaDescription = {
@@ -19,15 +62,6 @@ const schemaDescription = {
   snippet:
     "Snippet about the brand/topic in 100 words MAXIMUM based on the prompt and the search results",
 };
-
-const resultSchema = z.object({
-  title: z.string().describe(schemaDescription.title),
-  url: z.string().describe(schemaDescription.url),
-  snippet: z.string().describe(schemaDescription.snippet),
-});
-const searchResultsSchema = z.array(resultSchema);
-
-export type SearchResult = z.infer<typeof resultSchema>;
 
 function createSearchPrompt(originalPrompt: string, region: string): string {
   return `<ROLE>
@@ -114,10 +148,62 @@ export async function processPromptWithOpenAI(
 
     const parsed = searchResultsSchema.parse(JSON.parse(result.text));
 
+    // Extract basic metadata - simplified to avoid TypeScript issues
+    const sources: Source[] = [];
+    const citations: Array<{
+      text: string;
+      sourceIndices: number[];
+      confidence?: number;
+    }> = [];
+    const searchQueries: string[] = [];
+
+    // Basic extraction without complex type checking
+    try {
+      const toolResults = result.toolResults as unknown[];
+      if (toolResults && Array.isArray(toolResults)) {
+        toolResults.forEach((toolResult: unknown) => {
+          const tr = toolResult as Record<string, unknown>;
+          if (tr.toolName === "web_search_preview" && tr.result) {
+            const webResult = tr.result as Record<string, unknown>;
+
+            if (webResult.query && typeof webResult.query === "string") {
+              searchQueries.push(webResult.query);
+            }
+
+            if (webResult.results && Array.isArray(webResult.results)) {
+              webResult.results.forEach((source: unknown) => {
+                const s = source as Record<string, unknown>;
+                sources.push({
+                  title: (s.title as string) || "",
+                  url: (s.url as string) || "",
+                  snippet: (s.snippet as string) || (s.content as string) || "",
+                  domain:
+                    s.url && typeof s.url === "string"
+                      ? new URL(s.url).hostname
+                      : undefined,
+                  publishedDate: s.publishedDate as string,
+                  confidence: s.score as number,
+                });
+              });
+            }
+          }
+        });
+      }
+    } catch {
+      // Silently continue if extraction fails
+    }
+
     return {
       provider: "openai",
       response: parsed,
       metadata: { result },
+      sources,
+      citations,
+      searchQueries,
+      groundingMetadata: result.toolResults as unknown as Record<
+        string,
+        unknown
+      >,
     };
   } catch (error) {
     return {
@@ -151,10 +237,80 @@ export async function processPromptWithGoogle(
 
     const parsed = searchResultsSchema.parse(result.object);
 
+    // Extract grounding metadata from Gemini response - simplified
+    const sources: Source[] = [];
+    const citations: Array<{
+      text: string;
+      sourceIndices: number[];
+      confidence?: number;
+    }> = [];
+    const searchQueries: string[] = [];
+
+    try {
+      const groundingMetadata = (result as unknown as Record<string, unknown>)
+        .groundingMetadata as Record<string, unknown>;
+      if (groundingMetadata) {
+        // Extract search queries
+        if (
+          groundingMetadata.webSearchQueries &&
+          Array.isArray(groundingMetadata.webSearchQueries)
+        ) {
+          searchQueries.push(
+            ...(groundingMetadata.webSearchQueries as string[])
+          );
+        }
+
+        // Extract grounding chunks (sources)
+        if (
+          groundingMetadata.groundingChunks &&
+          Array.isArray(groundingMetadata.groundingChunks)
+        ) {
+          groundingMetadata.groundingChunks.forEach((chunk: unknown) => {
+            const c = chunk as Record<string, unknown>;
+            if (c.web) {
+              const web = c.web as Record<string, unknown>;
+              sources.push({
+                title: (web.title as string) || "",
+                url: (web.uri as string) || "",
+                snippet: (c.snippet as string) || "",
+                domain: web.title as string,
+                confidence: c.confidence as number,
+              });
+            }
+          });
+        }
+
+        // Extract grounding supports (citations)
+        if (
+          groundingMetadata.groundingSupports &&
+          Array.isArray(groundingMetadata.groundingSupports)
+        ) {
+          groundingMetadata.groundingSupports.forEach((support: unknown) => {
+            const s = support as Record<string, unknown>;
+            const segment = s.segment as Record<string, unknown>;
+            citations.push({
+              text: (segment?.text as string) || "",
+              sourceIndices: (s.groundingChunkIndices as number[]) || [],
+              confidence: Array.isArray(s.confidenceScores)
+                ? (s.confidenceScores[0] as number)
+                : undefined,
+            });
+          });
+        }
+      }
+    } catch {
+      // Silently continue if extraction fails
+    }
+
     return {
       provider: "google",
       response: parsed,
       metadata: { result, region },
+      sources,
+      citations,
+      searchQueries,
+      groundingMetadata: (result as unknown as Record<string, unknown>)
+        .groundingMetadata as Record<string, unknown>,
     };
   } catch (error) {
     return {
@@ -241,10 +397,67 @@ export async function processPromptWithClaude(
       })
       .parse(formatted.input);
 
+    // Extract sources and citations from Claude's response - simplified
+    const sources: Source[] = [];
+    const citations: Array<{
+      text: string;
+      sourceIndices: number[];
+      confidence?: number;
+    }> = [];
+    const searchQueries: string[] = [];
+
+    try {
+      // Process Claude's content blocks for web search results
+      result.content.forEach((block) => {
+        if (block.type === "web_search_tool_result") {
+          const content = block.content as unknown;
+          if (Array.isArray(content)) {
+            content.forEach((searchResult: unknown) => {
+              const sr = searchResult as Record<string, unknown>;
+              if (sr.type === "web_search_result") {
+                sources.push({
+                  title: (sr.title as string) || "",
+                  url: (sr.url as string) || "",
+                  snippet: (sr.snippet as string) || "",
+                  domain:
+                    sr.url && typeof sr.url === "string"
+                      ? new URL(sr.url).hostname
+                      : undefined,
+                });
+              }
+            });
+          }
+        }
+
+        // Extract citations from text blocks with citations
+        if (block.type === "text") {
+          const citations_data = (block as unknown as Record<string, unknown>)
+            .citations;
+          if (Array.isArray(citations_data)) {
+            citations_data.forEach((citation: unknown) => {
+              const c = citation as Record<string, unknown>;
+              if (c.type === "web_search_result_location") {
+                citations.push({
+                  text: (c.cited_text as string) || "",
+                  sourceIndices: [sources.length - 1], // Reference to the last added source
+                });
+              }
+            });
+          }
+        }
+      });
+    } catch {
+      // Silently continue if extraction fails
+    }
+
     return {
       provider: "claude",
       response: parsed.results,
       metadata: { result },
+      sources,
+      citations,
+      searchQueries,
+      groundingMetadata: result.content as unknown as Record<string, unknown>,
     };
   } catch (error) {
     return {

@@ -10,6 +10,10 @@ export type LLMResult = Pick<
   | "errorMessage"
   | "completedAt"
   | "results"
+  | "sources"
+  | "citations"
+  | "searchQueries"
+  | "groundingMetadata"
 >;
 
 export type Prompt = Pick<

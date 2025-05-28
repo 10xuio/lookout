@@ -10,7 +10,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { SearchResult } from "@/lib/llm";
+import { SearchResult, Source } from "@/lib/llm";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -140,6 +140,18 @@ export const modelResults = pgTable(
     status: status("status").notNull().default("pending"),
     errorMessage: text("error_message"),
     results: jsonb("results").notNull().$type<SearchResult[]>().default([]),
+    sources: jsonb("sources").$type<Source[]>().default([]),
+    citations: jsonb("citations")
+      .$type<
+        Array<{
+          text: string;
+          sourceIndices: number[];
+          confidence?: number;
+        }>
+      >()
+      .default([]),
+    searchQueries: jsonb("search_queries").$type<string[]>().default([]),
+    groundingMetadata: jsonb("grounding_metadata").default({}),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     completedAt: timestamp("completed_at"),

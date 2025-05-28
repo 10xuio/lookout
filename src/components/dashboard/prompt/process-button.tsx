@@ -56,7 +56,6 @@ export function ProcessButton({ promptId, status }: ProcessButtonProps) {
       if (!response.ok) {
         throw new Error(data.error ?? "Failed to process prompt");
       }
-      console.log(data.message);
     } catch (error) {
       console.error("Failed to process prompt:", error);
       setCurrentStatus("failed");

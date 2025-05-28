@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Lightbulb } from "lucide-react";
 import { CreatePromptDialog } from "./create-dialog";
+import { SuggestionsDialog } from "./suggestions-dialog";
 
 export function PromptToolbar() {
   return (
@@ -17,10 +18,12 @@ export function PromptToolbar() {
             Add Prompt
           </Button>
         </CreatePromptDialog>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Lightbulb className="h-4 w-4" />
-          Suggestions
-        </Button>
+        <SuggestionsDialog topicId="test">
+          <Button variant="outline" size="sm" className="gap-2">
+            <Lightbulb className="h-4 w-4" />
+            Suggestions
+          </Button>
+        </SuggestionsDialog>
       </div>
     </div>
   );

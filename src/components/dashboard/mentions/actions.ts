@@ -97,6 +97,86 @@ export async function analyzeMentions() {
   }
 }
 
+const getPrompt = (
+  response: string,
+  brandName: string,
+  brandDescription: string
+) => {
+  return `<ROLE>
+You are an expert brand mention analyst specializing in identifying and categorizing brand references in text content.
+</ROLE>
+
+<TASK>
+Analyze the provided text for mentions of "${brandName}" and identify any references to this brand, related concepts, or competing brands.
+</TASK>
+
+<BRAND_CONTEXT>
+Brand Name: "${brandName}"
+Brand Description: "${brandDescription}"
+</BRAND_CONTEXT>
+
+<INSTRUCTIONS>
+- Scan the entire text for brand mentions and related references
+- Classify each mention into one of three types:
+  * "direct": Explicit mention of the brand name
+  * "indirect": References to brand-related concepts, products, or services without naming the brand
+  * "competitive": Mentions of competing brands in the same industry/category
+- For each mention, extract:
+  * mentionType: The classification (direct/indirect/competitive)
+  * position: The ordinal position of this mention in the text (1 for first, 2 for second, etc.)
+  * context: Up to 100 characters of surrounding text for context
+  * sentiment: Analyze the tone (positive/negative/neutral)
+  * confidence: Your confidence score from 0.0 to 1.0
+  * extractedText: The exact text that constitutes the mention
+  * competitorName: If competitive mention, the competitor's name (null otherwise)
+- Return ALL mentions found, even if confidence is low
+- Be thorough and don't miss subtle references
+</INSTRUCTIONS>
+
+<EXAMPLES>
+Text: "I love using Google for search, but Bing has improved lately."
+Brand: "Google"
+Result: [
+  {
+    "mentionType": "direct",
+    "position": 1,
+    "context": "I love using Google for search",
+    "sentiment": "positive",
+    "confidence": 1.0,
+    "extractedText": "Google",
+    "competitorName": null
+  },
+  {
+    "mentionType": "competitive",
+    "position": 2,
+    "context": "but Bing has improved lately",
+    "sentiment": "positive",
+    "confidence": 0.9,
+    "extractedText": "Bing",
+    "competitorName": "Bing"
+  }
+]
+
+Text: "The electric vehicle market is dominated by one company, though traditional automakers are catching up."
+Brand: "Tesla"
+Result: [
+  {
+    "mentionType": "indirect",
+    "position": 1,
+    "context": "The electric vehicle market is dominated by one company",
+    "sentiment": "neutral",
+    "confidence": 0.7,
+    "extractedText": "electric vehicle market is dominated by one company",
+    "competitorName": null
+  }
+]
+</EXAMPLES>
+
+<TEXT_TO_ANALYZE>
+${response}
+</TEXT_TO_ANALYZE>`;
+};
+
 async function detectMentionsInResponse(
   response: string,
   brandName: string,
@@ -106,23 +186,7 @@ async function detectMentionsInResponse(
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
       schema: MentionSchema,
-      prompt: `You are an expert at analyzing text for brand mentions. Analyze the given response for mentions of the specified brand or related competitors.
-
-Brand to analyze: "${brandName}"
-Brand description: "${brandDescription}"
-
-For each mention found, determine:
-1. mentionType: "direct" (explicit brand mention), "indirect" (related/contextual), or "competitive" (competitor mentioned)
-2. position: numerical position in the response (1st, 2nd, etc.)
-3. context: surrounding text (max 100 chars)
-4. sentiment: "positive", "negative", or "neutral"
-5. confidence: 0.0-1.0 confidence score
-6. extractedText: the exact mention text
-7. competitorName: if competitive mention, the competitor name
-
-Analyze this response for mentions of "${brandName}":
-
-${response}`,
+      prompt: getPrompt(response, brandName, brandDescription),
     });
 
     return object.mentions || [];

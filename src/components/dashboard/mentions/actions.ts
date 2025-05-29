@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { mentions, modelResults, prompts } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getUser } from "@/auth/server";
 import { revalidatePath } from "next/cache";
 import { generateObject } from "ai";
@@ -196,13 +196,16 @@ async function detectMentionsInResponse(
   }
 }
 
-export async function getMentions() {
+export async function getMentions({ topicId }: { topicId?: string }) {
   const user = await getUser();
   if (!user) throw new Error("User not found");
 
   try {
     const userPrompts = await db.query.prompts.findMany({
-      where: eq(prompts.userId, user.id),
+      where: and(
+        eq(prompts.userId, user.id),
+        ...(topicId ? [eq(prompts.topicId, topicId)] : [])
+      ),
       columns: { id: true },
       with: {
         mentions: {

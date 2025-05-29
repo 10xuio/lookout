@@ -125,7 +125,7 @@ function TableEmptyState({
             <h3 className="text-sm font-medium text-foreground mb-1">
               {title}
             </h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
+            <p className="text-sm text-muted-foreground max-w-sm whitespace-pre-wrap">
               {description}
             </p>
           </div>

@@ -6,8 +6,8 @@ import { MentionTableRow } from "./row";
 import { getMentions } from "./actions";
 import { AtSign } from "lucide-react";
 
-async function MentionsTableContent() {
-  const mentions = await getMentions();
+async function MentionsTableContent({ topicId }: { topicId?: string }) {
+  const mentions = await getMentions({ topicId });
 
   if (mentions.length === 0) {
     return (
@@ -29,13 +29,13 @@ async function MentionsTableContent() {
   );
 }
 
-export function MentionsTable() {
+export function MentionsTable({ topicId }: { topicId?: string }) {
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
         <MentionsTableHeader />
         <Suspense fallback={<MentionsTableSkeleton />}>
-          <MentionsTableContent />
+          <MentionsTableContent topicId={topicId} />
         </Suspense>
       </Table>
     </div>

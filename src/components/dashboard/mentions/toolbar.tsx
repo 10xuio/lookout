@@ -2,7 +2,7 @@ import { RefreshButton } from "./refresh-button";
 import { analyzeMentions } from "./actions";
 import { Stats } from "./stats";
 
-export async function MentionsToolbar() {
+export async function MentionsToolbar({ topicId }: { topicId?: string }) {
   const handleRefresh = async () => {
     "use server";
     await analyzeMentions();
@@ -21,7 +21,7 @@ export async function MentionsToolbar() {
           <RefreshButton />
         </form>
       </div>
-      <Stats />
+      <Stats topicId={topicId} />
     </div>
   );
 }

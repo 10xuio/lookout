@@ -15,8 +15,8 @@ export default async function Page({
     <>
       <MentionsBreadcrumb topicId={topicId} />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <MentionsToolbar />
-        <MentionsTable />
+        <MentionsToolbar topicId={topicId} />
+        <MentionsTable topicId={topicId} />
       </div>
     </>
   );

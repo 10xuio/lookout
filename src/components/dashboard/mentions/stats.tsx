@@ -4,8 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getMentions } from "./actions";
 import { AtSign, BicepsFlexed, Smile, Target } from "lucide-react";
 
-async function StatsContent() {
-  const mentions = await getMentions();
+async function StatsContent({ topicId }: { topicId?: string }) {
+  const mentions = await getMentions({ topicId });
 
   const stats = {
     total: mentions.length,
@@ -83,11 +83,11 @@ function StatsSkeleton() {
   );
 }
 
-export function Stats() {
+export function Stats({ topicId }: { topicId?: string }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <Suspense fallback={<StatsSkeleton />}>
-        <StatsContent />
+        <StatsContent topicId={topicId} />
       </Suspense>
     </div>
   );

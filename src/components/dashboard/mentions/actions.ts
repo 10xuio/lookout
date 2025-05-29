@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { mentions, modelResults, prompts } from "@/db/schema";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getUser } from "@/auth/server";
 import { revalidatePath } from "next/cache";
 import { generateObject } from "ai";
@@ -36,7 +36,6 @@ export async function analyzeMentions() {
   if (!user) throw new Error("User not found");
 
   try {
-    // Get all model results that need analysis
     const results = await db.query.modelResults.findMany({
       where: eq(modelResults.status, "completed"),
       with: {
@@ -48,7 +47,6 @@ export async function analyzeMentions() {
       },
     });
 
-    // Clear existing mentions for fresh analysis
     await db.delete(mentions);
 
     let totalProcessed = 0;
@@ -139,28 +137,19 @@ export async function getMentions() {
   if (!user) throw new Error("User not found");
 
   try {
-    // First get user's prompts
     const userPrompts = await db.query.prompts.findMany({
       where: eq(prompts.userId, user.id),
       columns: { id: true },
-    });
-
-    const promptIds = userPrompts.map((p) => p.id);
-
-    if (promptIds.length === 0) {
-      return [];
-    }
-
-    // Get mentions for user's prompts with relations
-    const userMentions = await db.query.mentions.findMany({
-      where: inArray(mentions.promptId, promptIds),
-      orderBy: desc(mentions.createdAt),
       with: {
-        topic: true,
+        mentions: {
+          with: {
+            topic: true,
+          },
+        },
       },
     });
 
-    return userMentions;
+    return userPrompts.flatMap((p) => p.mentions);
   } catch (error) {
     console.error("Failed to fetch mentions:", error);
     return [];

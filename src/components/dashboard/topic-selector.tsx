@@ -8,18 +8,31 @@ import {
 import type { Topic } from "@/types/topic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageAvatar } from "@/components/brand-list";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getTopics } from "./topics/actions";
 
 interface TopicSelectorProps {
   topics: Topic[];
   currentTopicId?: string;
   placeholder?: string;
+  url: string;
 }
 
 export function TopicSelectorSkeleton() {
   return <Skeleton className="w-6.5 h-6.5 rounded" />;
 }
 
-export function TopicSelector({ topics, currentTopicId }: TopicSelectorProps) {
+export function TopicSelectLogo({
+  topics,
+  currentTopicId,
+  url,
+}: TopicSelectorProps) {
   const selectedTopic = topics.find((topic) => topic.id === currentTopicId);
 
   return (
@@ -43,7 +56,7 @@ export function TopicSelector({ topics, currentTopicId }: TopicSelectorProps) {
             topics.map((topic) => (
               <Link
                 key={topic.id}
-                href={`/dashboard/rankings/${topic.id}`}
+                href={`${url}/${topic.id}`}
                 prefetch={false}
                 className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors border-b last:border-b-0"
               >
@@ -57,5 +70,38 @@ export function TopicSelector({ topics, currentTopicId }: TopicSelectorProps) {
         </div>
       </PopoverContent>
     </Popover>
+  );
+}
+
+export async function TopicSelect({
+  label,
+  currentTopicId,
+}: {
+  label: string;
+  currentTopicId?: string;
+}) {
+  const topics = await getTopics();
+
+  return (
+    <div className="grid gap-2">
+      <label htmlFor="topicId" className="text-sm font-medium">
+        {label}
+      </label>
+      <Select name="topicId" required defaultValue={currentTopicId}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select a topic..." />
+        </SelectTrigger>
+        <SelectContent>
+          {topics.map((topic) => (
+            <SelectItem key={topic.id} value={topic.id}>
+              {topic.logo && (
+                <ImageAvatar url={topic.logo} title={topic.name} />
+              )}
+              <span className="truncate">{topic.name}</span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }

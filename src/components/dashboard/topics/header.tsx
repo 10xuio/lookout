@@ -9,7 +9,7 @@ export function TopicsTableHeader() {
         <TableHead>
           <Checkbox />
         </TableHead>
-        <TableHead>
+        <TableHead className="w-1/6">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             Topic
@@ -21,13 +21,13 @@ export function TopicsTableHeader() {
             Description
           </div>
         </TableHead>
-        <TableHead>
+        <TableHead className="w-1/6">
           <div className="flex items-center gap-2">
             <Check className="h-4 w-4" />
             Active
           </div>
         </TableHead>
-        <TableHead>
+        <TableHead className="w-1/6">
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Actions

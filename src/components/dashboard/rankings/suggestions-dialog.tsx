@@ -6,9 +6,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { Suspense } from "react";
 import {
   generatePromptSuggestions,
@@ -17,15 +16,10 @@ import {
 import { getTopics } from "../topics/actions";
 import { createPrompt } from "./actions";
 import { revalidatePath } from "next/cache";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { TopicSelectionSubmitButton } from "./topic-selection-submit-button";
 import { redirect } from "next/navigation";
+import { TopicSelect } from "../topic-selector";
+import { LoadingButton } from "../../loading-button";
 
 const MAX_DIALOG_HEIGHT = 400;
 const DEFAULT_GEO_REGION = "global" as const;
@@ -184,23 +178,9 @@ async function TopicSelectionStep() {
   return (
     <div className="space-y-4">
       <form action={handleTopicSelection} className="space-y-4">
-        <div className="grid gap-2">
-          <label htmlFor="topic-select" className="text-sm font-medium">
-            Choose a topic for personalized suggestions:
-          </label>
-          <Select name="topicId" required>
-            <SelectTrigger id="topic-select">
-              <SelectValue placeholder="Select a topic..." />
-            </SelectTrigger>
-            <SelectContent>
-              {topics.map((topic) => (
-                <SelectItem key={topic.id} value={topic.id}>
-                  {topic.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+          <TopicSelect label="Choose a topic for personalized suggestions" />
+        </Suspense>
 
         <div className="flex gap-2">
           <TopicSelectionSubmitButton />
@@ -222,7 +202,6 @@ function SuggestionItem({
   suggestion,
   topicId,
   onAccept,
-  onReject,
 }: SuggestionItemProps) {
   return (
     <div className="flex items-start gap-2 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
@@ -236,42 +215,13 @@ function SuggestionItem({
           </p>
         )}
       </div>
-      <div className="flex gap-1 shrink-0">
-        {topicId ? (
-          <form action={onAccept.bind(null, suggestion)}>
-            <Button
-              type="submit"
-              size="icon"
-              variant="outline"
-              title="Create this prompt"
-              aria-label={`Create prompt: ${suggestion.content}`}
-            >
-              <Check className="h-4 w-4" />
-            </Button>
-          </form>
-        ) : (
-          <Button
-            size="icon"
-            variant="outline"
-            disabled
-            title="Select a topic first to create prompts"
-            aria-label="Select topic first"
-          >
+      {topicId && (
+        <form action={onAccept.bind(null, suggestion)}>
+          <LoadingButton>
             <Check className="h-4 w-4" />
-          </Button>
-        )}
-        <form action={onReject.bind(null, suggestion.id)}>
-          <Button
-            type="submit"
-            size="icon"
-            variant="outline"
-            title="Dismiss suggestion"
-            aria-label={`Dismiss suggestion: ${suggestion.content}`}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          </LoadingButton>
         </form>
-      </div>
+      )}
     </div>
   );
 }

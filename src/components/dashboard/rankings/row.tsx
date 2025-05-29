@@ -3,12 +3,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { BrandList } from "@/components/brand-list";
 import { ProcessButton } from "./process-button";
 import { Button } from "@/components/ui/button";
-import { Eye, Hash } from "lucide-react";
+import { Eye, Hash, Trash2 } from "lucide-react";
 import Link from "next/link";
 import type { Prompt } from "@/types/prompt";
 import { formatRelative } from "date-fns";
 import { deletePrompt } from "./actions";
-import { DeleteButton } from "./delete-button";
+import { LoadingButton } from "../../loading-button";
 import { cn, getVisibilityScoreColor } from "@/lib/utils";
 
 interface PromptTableRowProps {
@@ -29,8 +29,10 @@ export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
       <TableCell>
         <Checkbox />
       </TableCell>
-      <TableCell className="font-medium max-w-xs overflow-hidden whitespace-normal break-words">
-        {prompt.content}
+      <TableCell>
+        <div className="font-medium max-w-xs overflow-hidden whitespace-normal break-words">
+          {prompt.content}
+        </div>
       </TableCell>
       <TableCell
         className={cn(
@@ -60,12 +62,13 @@ export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
             <Link href={`/dashboard/rankings/${topicId}/${prompt.id}/results`}>
               <Button variant="outline" size="sm" className="gap-2">
                 <Eye className="h-4 w-4" />
-                View Results
               </Button>
             </Link>
           )}
           <form action={handleDelete}>
-            <DeleteButton />
+            <LoadingButton>
+              <Trash2 className="h-4 w-4" />
+            </LoadingButton>
           </form>
         </div>
       </TableCell>

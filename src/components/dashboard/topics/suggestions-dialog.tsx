@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X, Tag } from "lucide-react";
+import { Check, Tag } from "lucide-react";
 import { Suspense } from "react";
 import {
   generateTopicSuggestions,
@@ -28,7 +28,6 @@ async function fetchTopicSuggestions(): Promise<TopicSuggestion[]> {
   } catch (error) {
     console.error("Failed to generate topic suggestions:", error);
 
-    // Fallback to some default suggestions if AI fails
     return [
       {
         id: "fallback_1",
@@ -58,7 +57,7 @@ async function fetchTopicSuggestions(): Promise<TopicSuggestion[]> {
 function TopicSuggestionsListSkeleton() {
   return (
     <div className="space-y-3 mr-3">
-      {[...Array(6)].map((_, i) => (
+      {[...Array(5)].map((_, i) => (
         <div
           key={i}
           className="flex items-start gap-3 p-4 rounded-lg border bg-card"
@@ -88,8 +87,6 @@ async function TopicSuggestionsList() {
     "use server";
 
     try {
-      // Create topic using the suggestion name
-      // We'll use the name as a URL-like identifier for now
       const result = await createTopicFromUrl({
         url: suggestion.name.toLowerCase().replace(/\s+/g, "") + ".com",
       });
@@ -102,12 +99,6 @@ async function TopicSuggestionsList() {
     } catch (error) {
       console.error("Error creating topic from suggestion:", error);
     }
-  }
-
-  async function handleReject(suggestionId: string) {
-    "use server";
-    console.log("Rejected topic suggestion:", suggestionId);
-    // TODO: Implement rejection logic (e.g., feedback for AI)
   }
 
   return (
@@ -139,17 +130,6 @@ async function TopicSuggestionsList() {
               >
                 <Check className="h-4 w-4" />
                 <span className="sr-only">Accept topic suggestion</span>
-              </Button>
-            </form>
-            <form action={handleReject.bind(null, suggestion.id)}>
-              <Button
-                type="submit"
-                size="icon"
-                variant="outline"
-                title="Dismiss suggestion"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Reject topic suggestion</span>
               </Button>
             </form>
           </div>

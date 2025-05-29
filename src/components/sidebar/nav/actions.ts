@@ -15,7 +15,7 @@ export async function getUserData(): Promise<User> {
 
   return {
     name: "Chaitanya",
-    email: "chaitanya@10xu.io",
+    email: "chaitanya@tesla.com",
     avatar: "/avatars/chaitanya.jpg",
   };
 }
@@ -24,7 +24,7 @@ export async function getTeamsData(): Promise<Team> {
   await new Promise((resolve) => setTimeout(resolve, 1050));
 
   return {
-    name: "10XU Inc.",
+    name: "Tesla",
     logo: "tesla.com",
     plan: "Enterprise",
   };

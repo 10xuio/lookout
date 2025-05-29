@@ -1,7 +1,9 @@
 import { Suspense } from "react";
-import { PromptBreadcrumb } from "@/components/dashboard/rankings/breadcrumb";
-import { ResultsLoadingSkeleton } from "@/components/dashboard/rankings/results/skelaton";
-import { ResultsContent } from "@/components/dashboard/rankings/results/result-content";
+import {
+  RankingsBreadcrumb,
+  ResultsLoadingSkeleton,
+  ResultsContent,
+} from "@/components/dashboard";
 
 interface ResultsPageProps {
   params: Promise<{ topicId: string; promptId: string }>;
@@ -12,7 +14,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
   return (
     <>
-      <PromptBreadcrumb topicId={topicId} page="results" />
+      <RankingsBreadcrumb topicId={topicId} page="results" />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <Suspense fallback={<ResultsLoadingSkeleton />}>
           <ResultsContent promptId={promptId} />

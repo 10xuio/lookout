@@ -11,7 +11,7 @@ export function PromptsTableSkeleton() {
             <Checkbox />
           </TableCell>
           <TableCell>
-            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-4 w-full" />
           </TableCell>
           <TableCell>
             <Skeleton className="h-5 w-16 rounded" />
@@ -30,10 +30,9 @@ export function PromptsTableSkeleton() {
             <Skeleton className="h-4 w-16" />
           </TableCell>
           <TableCell>
-            <div className="flex gap-2">
-              <Skeleton className="h-8 w-8 rounded" />
-              <Skeleton className="h-8 w-8 rounded" />
-              <Skeleton className="h-8 w-8 rounded" />
+            <div className="flex gap-1">
+              <Skeleton className="h-8 w-10 rounded" />
+              <Skeleton className="h-8 w-10 rounded" />
             </div>
           </TableCell>
         </TableRow>

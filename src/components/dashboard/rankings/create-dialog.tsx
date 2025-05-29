@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { createPrompt } from "./actions";
-import { getTopics } from "../topics/actions";
+import { TopicSelect } from "../topic-selector";
 import { SubmitButton } from "./submit-button";
 import { Region } from "@/types/prompt";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,30 +25,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface CreatePromptDialogProps {
   children: React.ReactNode;
-}
-
-async function TopicSelect() {
-  const topics = await getTopics();
-
-  return (
-    <div className="grid gap-2">
-      <label htmlFor="topicId" className="text-sm font-medium">
-        Topic
-      </label>
-      <Select name="topicId">
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Topic" />
-        </SelectTrigger>
-        <SelectContent>
-          {topics.map((topic) => (
-            <SelectItem key={topic.id} value={topic.id}>
-              {topic.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
 }
 
 export function CreatePromptDialog({ children }: CreatePromptDialogProps) {
@@ -100,14 +76,14 @@ export function CreatePromptDialog({ children }: CreatePromptDialogProps) {
             </div>
 
             <Suspense fallback={<Skeleton className="w-full h-10" />}>
-              <TopicSelect />
+              <TopicSelect label="Topic" />
             </Suspense>
 
             <div className="grid gap-2">
               <label htmlFor="geoRegion" className="text-sm font-medium">
                 Geographic Region
               </label>
-              <Select name="geoRegion">
+              <Select name="geoRegion" required>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Location" />
                 </SelectTrigger>

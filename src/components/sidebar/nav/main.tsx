@@ -22,15 +22,15 @@ const staticNavMain = [
     url: "/dashboard/rankings",
   },
   {
+    title: "Mentions",
+    icon: AtSign,
+    url: "/dashboard/mentions",
+  },
+  {
     title: "Competitors",
     icon: BicepsFlexed,
     disabled: true,
     url: "/dashboard/competitors",
-  },
-  {
-    title: "Mentions",
-    icon: AtSign,
-    url: "/dashboard/mentions",
   },
 ];
 

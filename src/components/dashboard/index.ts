@@ -15,3 +15,6 @@ export { TopicsBreadcrumb } from "./topics/breadcrumb";
 export { MentionsTable } from "./mentions/table";
 export { MentionsToolbar } from "./mentions/toolbar";
 export { MentionsBreadcrumb } from "./mentions/breadcrumb";
+
+export { SuggestionsDialog } from "./rankings/suggestions-dialog";
+export { SuggestionsList } from "./rankings/suggestions-dialog";

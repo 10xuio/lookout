@@ -12,9 +12,7 @@ export function CreatePromptForm({ topicId }: CreatePromptFormProps) {
 
     const content = formData.get("content") as string;
 
-    if (!content?.trim()) {
-      return;
-    }
+    if (!content?.trim()) return;
 
     await createPrompt({
       content: content.trim(),
@@ -32,16 +30,15 @@ export function CreatePromptForm({ topicId }: CreatePromptFormProps) {
         <Textarea
           id="content"
           name="content"
-          placeholder="e.g., best accounting software for small business"
+          placeholder="e.g., Best accounting software for small business"
           required
           rows={3}
           className="resize-none"
         />
         <p className="text-xs text-muted-foreground">
-          Enter a search query you want to track for SEO performance
+          Enter a prompt you want to track for AI ranking performance
         </p>
       </div>
-
       <SubmitButton
         loadingText="Creating prompt..."
         buttonText="Create Prompt"

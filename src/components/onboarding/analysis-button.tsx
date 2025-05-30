@@ -31,11 +31,7 @@ export function AnalysisButton({ promptId }: AnalysisButtonProps) {
       }
 
       toast.success("Analysis started! This may take a few minutes.");
-
-      // Redirect to dashboard after a short delay
-      setTimeout(() => {
-        router.push("/dashboard/rankings");
-      }, 2000);
+      setTimeout(() => router.push("/dashboard/rankings"), 2000);
     } catch (error) {
       console.error("Failed to start analysis:", error);
       toast.error(
@@ -55,12 +51,12 @@ export function AnalysisButton({ promptId }: AnalysisButtonProps) {
       {isProcessing ? (
         <>
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Starting Analysis...
+          Starting analysis for your topic...
         </>
       ) : (
         <>
-          <Search className="h-4 w-4 mr-2" />
-          Start Analysis
+          <Search className="h-4 w-4 mr-2 capitalize" />
+          Start analysis for your topic
         </>
       )}
     </Button>

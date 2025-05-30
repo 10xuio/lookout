@@ -62,7 +62,10 @@ interface SuggestionsDialogProps {
   topicId?: string;
 }
 
-async function fetchSuggestions(topicId?: string): Promise<PromptSuggestion[]> {
+async function fetchSuggestions(
+  topicId?: string,
+  count = 5
+): Promise<PromptSuggestion[]> {
   "use server";
 
   try {
@@ -77,7 +80,7 @@ async function fetchSuggestions(topicId?: string): Promise<PromptSuggestion[]> {
         );
 
         if (Array.isArray(suggestions) && suggestions.length > 0) {
-          return suggestions;
+          return suggestions.slice(0, count);
         }
       }
     }
@@ -87,8 +90,8 @@ async function fetchSuggestions(topicId?: string): Promise<PromptSuggestion[]> {
     );
 
     return Array.isArray(genericSuggestions) && genericSuggestions.length > 0
-      ? genericSuggestions
-      : DEFAULT_FALLBACK_SUGGESTIONS;
+      ? genericSuggestions.slice(0, count)
+      : DEFAULT_FALLBACK_SUGGESTIONS.slice(0, count);
   } catch (error) {
     console.error("Failed to generate suggestions:", {
       error,
@@ -96,7 +99,7 @@ async function fetchSuggestions(topicId?: string): Promise<PromptSuggestion[]> {
       timestamp: new Date().toISOString(),
     });
 
-    return DEFAULT_FALLBACK_SUGGESTIONS;
+    return DEFAULT_FALLBACK_SUGGESTIONS.slice(0, count);
   }
 }
 
@@ -199,7 +202,6 @@ interface SuggestionItemProps {
   suggestion: PromptSuggestion;
   topicId?: string;
   onAccept: (suggestion: PromptSuggestion) => Promise<void>;
-  onReject: (suggestionId: string) => Promise<void>;
 }
 
 function SuggestionItem({
@@ -230,8 +232,14 @@ function SuggestionItem({
   );
 }
 
-async function SuggestionsList({ topicId }: { topicId?: string }) {
-  const suggestions = await fetchSuggestions(topicId);
+export async function SuggestionsList({
+  topicId,
+  count = 5,
+}: {
+  topicId?: string;
+  count?: number;
+}) {
+  const suggestions = await fetchSuggestions(topicId, count);
 
   async function handleAccept(suggestion: PromptSuggestion) {
     "use server";
@@ -266,16 +274,6 @@ async function SuggestionsList({ topicId }: { topicId?: string }) {
     }
   }
 
-  async function handleReject(suggestionId: string) {
-    "use server";
-
-    console.log("Suggestion rejected:", {
-      suggestionId,
-      timestamp: new Date().toISOString(),
-      topicId,
-    });
-  }
-
   return (
     <div className="space-y-3 mr-3">
       {!topicId && (
@@ -293,7 +291,6 @@ async function SuggestionsList({ topicId }: { topicId?: string }) {
           suggestion={suggestion}
           topicId={topicId}
           onAccept={handleAccept}
-          onReject={handleReject}
         />
       ))}
     </div>

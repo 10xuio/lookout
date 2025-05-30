@@ -1,4 +1,4 @@
-import { AtSign, BicepsFlexed, Bot, SquareTerminal } from "lucide-react";
+import { AtSign, BicepsFlexed, Bot, Tag } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 const staticNavMain = [
   {
     title: "Topics",
-    icon: SquareTerminal,
+    icon: Tag,
     url: "/dashboard/topics",
   },
   {

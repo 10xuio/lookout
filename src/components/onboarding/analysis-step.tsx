@@ -1,50 +1,11 @@
-"use client";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Loader2, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Search } from "lucide-react";
+import { AnalysisButton } from "./analysis-button";
 
 interface AnalysisStepProps {
   promptId: string;
 }
 
 export function AnalysisStep({ promptId }: AnalysisStepProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const router = useRouter();
-
-  async function handleAnalysis() {
-    try {
-      setIsProcessing(true);
-
-      const response = await fetch("/api/prompts/process", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ promptId }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error ?? "Failed to start analysis");
-      }
-
-      toast.success("Analysis started! This may take a few minutes.");
-
-      // Redirect to dashboard after a short delay
-      setTimeout(() => {
-        router.push("/dashboard/rankings");
-      }, 2000);
-    } catch (error) {
-      console.error("Failed to start analysis:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to start analysis"
-      );
-      setIsProcessing(false);
-    }
-  }
-
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
@@ -59,24 +20,7 @@ export function AnalysisStep({ promptId }: AnalysisStepProps) {
       </div>
 
       <div className="max-w-sm mx-auto space-y-4">
-        <Button
-          onClick={handleAnalysis}
-          disabled={isProcessing}
-          size="lg"
-          className="w-full h-12"
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Starting Analysis...
-            </>
-          ) : (
-            <>
-              <Search className="h-4 w-4 mr-2" />
-              Start Analysis
-            </>
-          )}
-        </Button>
+        <AnalysisButton promptId={promptId} />
 
         <p className="text-xs text-center text-muted-foreground">
           Analysis typically takes 2-3 minutes to complete

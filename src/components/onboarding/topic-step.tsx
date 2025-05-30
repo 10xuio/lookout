@@ -1,33 +1,19 @@
-"use client";
-
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { createTopicFromUrl } from "@/components/dashboard/topics/actions";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { Globe } from "lucide-react";
 
 export function TopicStep() {
-  const [url, setUrl] = useState("");
-  const router = useRouter();
-
   async function handleSubmit(formData: FormData) {
+    "use server";
+
     const url = formData.get("url") as string;
 
     if (!url?.trim()) {
-      toast.error("Please enter a website URL");
       return;
     }
 
-    const result = await createTopicFromUrl({ url: url.trim() });
-
-    if (result.success) {
-      toast.success("Topic created successfully!");
-      router.refresh();
-    } else {
-      toast.error(result.error || "Failed to create topic");
-    }
+    await createTopicFromUrl({ url: url.trim() });
   }
 
   return (
@@ -53,8 +39,6 @@ export function TopicStep() {
             name="url"
             type="url"
             placeholder="https://example.com or example.com"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
             required
             className="h-12"
           />

@@ -6,13 +6,15 @@ import { AnalysisStep } from "./analysis-step";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { redirect } from "next/navigation";
 
 export async function Onboarding() {
   const topics = await getTopics();
   const hasTopics = topics.length > 0;
 
+  let firstPromptId: string | null = null;
   let hasPrompts = false;
-  let firstPromptId = "";
+  let hasAnalysis = false;
 
   if (hasTopics) {
     const { getPrompts } = await import(
@@ -20,8 +22,11 @@ export async function Onboarding() {
     );
     const prompts = await getPrompts(topics[0].id);
     hasPrompts = prompts.length > 0;
-    firstPromptId = prompts[0]?.id || "";
+    firstPromptId = prompts[0]?.id;
+    hasAnalysis = (prompts[0]?.modelResults?.length ?? 0) > 0;
   }
+
+  if (hasAnalysis) redirect("/dashboard/rankings");
 
   const steps = [
     {
@@ -45,8 +50,8 @@ export async function Onboarding() {
       number: 3,
       title: "Run Analysis",
       isComplete: false,
-      isActive: hasPrompts,
-      isLocked: !hasPrompts,
+      isActive: firstPromptId ? true : false,
+      isLocked: !firstPromptId,
     },
   ];
 
@@ -76,7 +81,7 @@ export async function Onboarding() {
 
           <StepContainer step={steps[2]} isLastStep={true}>
             <Suspense fallback={<StepSkeleton />}>
-              {hasPrompts ? (
+              {firstPromptId ? (
                 <AnalysisStep promptId={firstPromptId} />
               ) : (
                 <LockedStep

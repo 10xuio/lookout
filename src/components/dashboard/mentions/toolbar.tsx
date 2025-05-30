@@ -1,6 +1,7 @@
-import { RefreshButton } from "./refresh-button";
+import { LoadingButton } from "@/components/loading-button";
 import { analyzeMentions } from "./actions";
 import { Stats } from "./stats";
+import { RefreshCw } from "lucide-react";
 
 export async function MentionsToolbar({ topicId }: { topicId?: string }) {
   const handleRefresh = async () => {
@@ -10,17 +11,12 @@ export async function MentionsToolbar({ topicId }: { topicId?: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium">Brand Mentions Analysis</h3>
-          <p className="text-sm text-muted-foreground">
-            Track how your brand appears across AI responses
-          </p>
-        </div>
-        <form action={handleRefresh}>
-          <RefreshButton />
-        </form>
-      </div>
+      <form action={handleRefresh} className="flex justify-end">
+        <LoadingButton>
+          <RefreshCw className="h-4 w-4" />
+          Refresh Analysis
+        </LoadingButton>
+      </form>
       <Stats topicId={topicId} />
     </div>
   );

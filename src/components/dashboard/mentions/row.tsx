@@ -1,29 +1,9 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Smile, Frown, Meh } from "lucide-react";
 import { formatRelative } from "date-fns";
 import { ImageAvatar } from "@/components/brand-list";
-import { Topic } from "@/types/topic";
-
-interface MentionWithTopic {
-  id: string;
-  promptId: string;
-  topicId: string;
-  modelResultId: string;
-  model: "openai" | "claude" | "google";
-  mentionType: "direct" | "indirect" | "competitive";
-  position: string | null;
-  context: string;
-  sentiment: "positive" | "negative" | "neutral";
-  confidence: string | null;
-  extractedText: string;
-  createdAt: Date;
-  topic: Topic;
-}
-
-interface MentionTableRowProps {
-  mention: MentionWithTopic;
-}
+import { Mention } from "@/types/mentions";
 
 const getSentimentIcon = ({
   sentiment,
@@ -32,15 +12,15 @@ const getSentimentIcon = ({
 }) => {
   switch (sentiment) {
     case "positive":
-      return <TrendingUp className="h-4 w-4 text-green-600" />;
+      return <Smile className="h-4 w-4 text-green-600" />;
     case "negative":
-      return <TrendingDown className="h-4 w-4 text-red-600" />;
+      return <Frown className="h-4 w-4 text-red-600" />;
     case "neutral":
-      return <Minus className="h-4 w-4 text-gray-600" />;
+      return <Meh className="h-4 w-4 text-gray-600" />;
   }
 };
 
-export function MentionTableRow({ mention }: MentionTableRowProps) {
+export function MentionTableRow({ mention }: { mention: Mention }) {
   return (
     <TableRow>
       <TableCell>
@@ -54,7 +34,7 @@ export function MentionTableRow({ mention }: MentionTableRowProps) {
           <span className="truncate">{mention.topic.name}</span>
         </div>
       </TableCell>
-      <TableCell>{mention.mentionType}</TableCell>
+      <TableCell className="capitalize">{mention.mentionType}</TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
           {getSentimentIcon({ sentiment: mention.sentiment })}
@@ -75,7 +55,7 @@ export function MentionTableRow({ mention }: MentionTableRowProps) {
       <TableCell className="text-sm text-muted-foreground">
         {mention.position ? `#${mention.position}` : "N/A"}
       </TableCell>
-      <TableCell className="text-sm text-muted-foreground">
+      <TableCell className="text-sm text-muted-foreground capitalize">
         {formatRelative(new Date(mention.createdAt), new Date())}
       </TableCell>
     </TableRow>

@@ -7,6 +7,10 @@
     "src/app/api/prompts/[promptId]/status/route.ts": {
       "maxDuration": 10,
       "memory": 256
+    },
+    "src/app/api/analyze-mentions/route.ts": {
+      "maxDuration": 300,
+      "memory": 1024
     }
   },
   "crons": []

@@ -53,6 +53,7 @@ export async function getPrompts(topicId?: string): Promise<Prompt[]> {
         completedAt: prompt.completedAt,
         status: prompt.status,
         top: allResults,
+        topic: prompt.topic,
         modelResults: prompt.modelResults,
       };
     });

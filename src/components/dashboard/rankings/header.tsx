@@ -40,13 +40,13 @@ export function PromptsTableHeader() {
             Location
           </div>
         </TableHead>
-        <TableHead className="w-1/8">
+        <TableHead className="w-1/6">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Completed
           </div>
         </TableHead>
-        <TableHead className="w-1/6">
+        <TableHead className="w-1/8">
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Actions

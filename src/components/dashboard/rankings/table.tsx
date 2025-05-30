@@ -23,7 +23,7 @@ async function PromptsTableContent({ topicId }: { topicId?: string }) {
   return (
     <TableBody>
       {prompts.map((prompt) => (
-        <PromptTableRow key={prompt.id} prompt={prompt} topicId={topicId} />
+        <PromptTableRow key={prompt.id} prompt={prompt} />
       ))}
     </TableBody>
   );

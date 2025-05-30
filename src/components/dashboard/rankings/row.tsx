@@ -13,10 +13,9 @@ import { cn, getVisibilityScoreColor } from "@/lib/utils";
 
 interface PromptTableRowProps {
   prompt: Prompt;
-  topicId?: string;
 }
 
-export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
+export function PromptTableRow({ prompt }: PromptTableRowProps) {
   const handleDelete = async () => {
     "use server";
     await deletePrompt(prompt.id);
@@ -50,7 +49,7 @@ export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
       <TableCell className="text-sm text-muted-foreground">
         {prompt.geoRegion.toUpperCase()}
       </TableCell>
-      <TableCell className="text-sm text-muted-foreground">
+      <TableCell className="text-sm text-muted-foreground truncate">
         {prompt.completedAt
           ? formatRelative(new Date(prompt.completedAt), new Date())
           : "Pending"}
@@ -59,15 +58,22 @@ export function PromptTableRow({ prompt, topicId }: PromptTableRowProps) {
         <div className="flex gap-2">
           <ProcessButton promptId={prompt.id} status={prompt.status} />
           {prompt.status === "completed" && (
-            <Link href={`/dashboard/rankings/${topicId}/${prompt.id}/results`}>
-              <Button variant="outline" size="sm" className="gap-2">
+            <Link
+              href={`/dashboard/rankings/${prompt.topic?.id}/${prompt.id}/results`}
+            >
+              <Button
+                aria-label="View results"
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
                 <Eye className="h-4 w-4" />
               </Button>
             </Link>
           )}
           <form action={handleDelete}>
             <LoadingButton>
-              <Trash2 className="h-4 w-4" />
+              <Trash2 aria-label="Delete prompt" className="h-4 w-4" />
             </LoadingButton>
           </form>
         </div>

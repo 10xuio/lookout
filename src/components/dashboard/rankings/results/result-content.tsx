@@ -86,7 +86,6 @@ export async function ResultsContent({ promptId }: { promptId: string }) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Ranking Results</h1>
       <PromptSummaryCard prompt={prompt} visibilityScore={visibilityScore} />
       <ModelResultsList modelResults={prompt.modelResults} />
     </div>

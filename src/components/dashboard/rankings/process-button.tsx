@@ -64,7 +64,7 @@ export function ProcessButton({ promptId, status }: ProcessButtonProps) {
 
   if (currentStatus === "processing") {
     return (
-      <Button variant="outline" size="sm" disabled>
+      <Button aria-label="Processing" variant="outline" size="sm" disabled>
         <Loader2 className="h-4 w-4 animate-spin" />
       </Button>
     );
@@ -72,14 +72,24 @@ export function ProcessButton({ promptId, status }: ProcessButtonProps) {
 
   if (currentStatus === "failed") {
     return (
-      <Button variant="outline" size="sm" onClick={handleProcess}>
+      <Button
+        aria-label="Retry"
+        variant="outline"
+        size="sm"
+        onClick={handleProcess}
+      >
         <RotateCcw className="h-4 w-4" />
       </Button>
     );
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleProcess}>
+    <Button
+      aria-label="Process prompt"
+      variant="outline"
+      size="sm"
+      onClick={handleProcess}
+    >
       <Search className="h-4 w-4" />
     </Button>
   );

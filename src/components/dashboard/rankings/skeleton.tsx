@@ -30,7 +30,8 @@ export function PromptsTableSkeleton() {
             <Skeleton className="h-4 w-16" />
           </TableCell>
           <TableCell>
-            <div className="flex gap-1">
+            <div className="flex gap-2">
+              <Skeleton className="h-8 w-10 rounded" />
               <Skeleton className="h-8 w-10 rounded" />
               <Skeleton className="h-8 w-10 rounded" />
             </div>

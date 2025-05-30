@@ -26,8 +26,9 @@ export function TopicsTableSkeleton() {
           </TableCell>
           <TableCell>
             <div className="flex items-center gap-2">
-              <Skeleton className="h-8 w-30 rounded" />
-              <Skeleton className="h-8 w-8 rounded" />
+              <Skeleton className="h-8 w-10 rounded" />
+              <Skeleton className="h-8 w-10 rounded" />
+              <Skeleton className="h-8 w-10 rounded" />
             </div>
           </TableCell>
         </TableRow>

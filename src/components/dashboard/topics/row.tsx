@@ -1,7 +1,7 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2 } from "lucide-react";
+import { AtSign, Eye, Trash2 } from "lucide-react";
 import Link from "next/link";
 import type { Topic } from "@/types/topic";
 import { ImageAvatar } from "@/components/brand-list";
@@ -39,13 +39,17 @@ export function TopicTableRow({ topic }: TopicTableRowProps) {
         <div className="flex items-center gap-2">
           <Link href={`/dashboard/rankings/${topic.id}`}>
             <Button variant="outline" size="sm" className="gap-2">
-              <Eye className="h-4 w-4" />
-              View Rankings
+              <Eye aria-label="View rankings" className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href={`/dashboard/mentions/${topic.id}`}>
+            <Button variant="outline" size="sm" className="gap-2">
+              <AtSign aria-label="View mentions" className="h-4 w-4" />
             </Button>
           </Link>
           <form action={handleDelete}>
             <LoadingButton>
-              <Trash2 className="h-4 w-4" />
+              <Trash2 aria-label="Delete topic" className="h-4 w-4" />
             </LoadingButton>
           </form>
         </div>

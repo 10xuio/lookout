@@ -48,7 +48,8 @@ export function CreateTopicDialog({ children }: CreateTopicDialogProps) {
               <Input
                 id="url"
                 name="url"
-                placeholder="https://google.com or google.com"
+                type="url"
+                placeholder="https://google.com"
                 required
                 autoFocus
               />

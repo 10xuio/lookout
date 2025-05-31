@@ -18,3 +18,6 @@ export { MentionsBreadcrumb } from "./mentions/breadcrumb";
 
 export { SuggestionsDialog } from "./rankings/suggestions-dialog";
 export { SuggestionsList } from "./rankings/suggestions-dialog";
+
+export * from "./topics/actions";
+export * from "./rankings/actions";

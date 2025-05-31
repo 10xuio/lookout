@@ -1,6 +1,6 @@
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitButton } from "@/components/submit-button";
-import { createPrompt } from "@/components/dashboard/rankings/actions";
+import { createPrompt } from "@/components/dashboard";
 
 interface CreatePromptFormProps {
   topicId: string;

@@ -17,9 +17,7 @@ export async function Onboarding() {
   let hasAnalysis = false;
 
   if (hasTopics) {
-    const { getPrompts } = await import(
-      "@/components/dashboard/rankings/actions"
-    );
+    const { getPrompts } = await import("@/components/dashboard");
     const prompts = await getPrompts(topics[0].id);
     hasPrompts = prompts.length > 0;
     firstPromptId = prompts[0]?.id;

@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
-import { createTopicFromUrl } from "@/components/dashboard/topics/actions";
+import { createTopicFromUrl } from "@/components/dashboard";
 import { Tag } from "lucide-react";
 
 interface TopicStepProps {

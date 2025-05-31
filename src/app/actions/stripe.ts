@@ -19,7 +19,7 @@ export async function createCheckoutSession(planType: string) {
       throw new Error("Invalid plan type");
     }
 
-    const plan = PLANS[planType as keyof typeof PLANS];
+    const plan = PLANS[planType];
 
     if (planType === "free") {
       throw new Error("Cannot create checkout for free plan");

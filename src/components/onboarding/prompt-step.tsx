@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CreatePromptForm } from "./create-prompt-form";
 import { Separator } from "@/components/ui/separator";
-import { SuggestionsList } from "../dashboard/";
+import { SuggestionsList } from "../dashboard";
 
 interface PromptStepProps {
   topicId: string;

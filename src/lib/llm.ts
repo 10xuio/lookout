@@ -1,10 +1,127 @@
 import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
+import { perplexity } from "@ai-sdk/perplexity";
 import { Anthropic } from "@anthropic-ai/sdk";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
-export type LLMProvider = "openai" | "claude" | "google";
+export type LLMProvider = "openai" | "claude" | "google" | "perplexity";
+
+// Retry configuration for Claude
+interface RetryConfig {
+  maxRetries: number;
+  baseDelay: number;
+  maxDelay: number;
+  backoffMultiplier: number;
+}
+
+const DEFAULT_RETRY_CONFIG: RetryConfig = {
+  maxRetries: 3,
+  baseDelay: 1000, // 1 second
+  maxDelay: 10000, // 10 seconds
+  backoffMultiplier: 2,
+};
+
+// Utility function for exponential backoff retry
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  config: RetryConfig = DEFAULT_RETRY_CONFIG,
+  attempt: number = 1
+): Promise<T> {
+  try {
+    const result = await fn();
+
+    // Log success if we had to retry
+    if (attempt > 1) {
+      console.log(`Claude API call succeeded on attempt ${attempt}`);
+    }
+
+    return result;
+  } catch (error) {
+    // Check if we should retry based on error type
+    const shouldRetry = shouldRetryError(error, attempt, config.maxRetries);
+
+    if (!shouldRetry) {
+      throw error;
+    }
+
+    // Calculate delay with exponential backoff and jitter
+    const delay = Math.min(
+      config.baseDelay * Math.pow(config.backoffMultiplier, attempt - 1),
+      config.maxDelay
+    );
+
+    // Add jitter to prevent thundering herd
+    const jitteredDelay = delay + Math.random() * 1000;
+
+    console.warn(
+      `Claude API call failed (attempt ${attempt}/${
+        config.maxRetries
+      }), retrying in ${Math.round(jitteredDelay)}ms:`,
+      error instanceof Error ? error.message : "Unknown error"
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, jitteredDelay));
+
+    return retryWithBackoff(fn, config, attempt + 1);
+  }
+}
+
+// Determine if an error should trigger a retry
+function shouldRetryError(
+  error: unknown,
+  attempt: number,
+  maxRetries: number
+): boolean {
+  if (attempt >= maxRetries) {
+    return false;
+  }
+
+  if (error instanceof Error) {
+    const errorMessage = error.message.toLowerCase();
+
+    // Retry on rate limits
+    if (
+      errorMessage.includes("rate limit") ||
+      errorMessage.includes("too many requests")
+    ) {
+      return true;
+    }
+
+    // Retry on temporary server errors
+    if (
+      errorMessage.includes("internal server error") ||
+      errorMessage.includes("service unavailable") ||
+      errorMessage.includes("timeout") ||
+      errorMessage.includes("network") ||
+      errorMessage.includes("connection")
+    ) {
+      return true;
+    }
+
+    // Retry on specific HTTP status codes if available
+    if (
+      errorMessage.includes("500") ||
+      errorMessage.includes("502") ||
+      errorMessage.includes("503") ||
+      errorMessage.includes("504") ||
+      errorMessage.includes("429")
+    ) {
+      return true;
+    }
+  }
+
+  // For Anthropic SDK specific errors
+  if (error && typeof error === "object" && "status" in error) {
+    const status = (error as { status: number }).status;
+    // Retry on 429 (rate limit), 500, 502, 503, 504
+    if ([429, 500, 502, 503, 504].includes(status)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 // Enhanced source schema with additional metadata
 export const sourceSchema = z.object({
@@ -322,6 +439,142 @@ export async function processPromptWithGoogle(
   }
 }
 
+export async function processPromptWithPerplexity(
+  prompt: string,
+  region: string
+): Promise<LLMResponse> {
+  try {
+    // First try to get structured results using generateObject
+    const structuredResult = await generateObject({
+      model: perplexity("sonar-pro"),
+      maxTokens: 5000,
+      output: "object",
+      schema: searchResultsSchema,
+      prompt: `${prompt}\n\nPlease provide your response as a JSON array of objects with the following structure: [{"title": "Brand/Topic Name", "url": "https://example.com", "snippet": "Brief description..."}]`,
+    });
+
+    if (structuredResult.object) {
+      const parsed = searchResultsSchema.parse(structuredResult.object);
+
+      // Also get text result to access sources
+      const textResult = await generateText({
+        model: perplexity("sonar-pro"),
+        prompt,
+      });
+
+      // Extract sources from Perplexity response
+      const sources: Source[] = [];
+      const citations: Array<{
+        text: string;
+        sourceIndices: number[];
+        confidence?: number;
+      }> = [];
+      const searchQueries: string[] = [];
+
+      try {
+        // Access Perplexity-specific sources from text result
+        if (textResult.sources && Array.isArray(textResult.sources)) {
+          textResult.sources.forEach((source: unknown) => {
+            const s = source as Record<string, unknown>;
+            sources.push({
+              title: (s.title as string) || "",
+              url: (s.url as string) || "",
+              snippet: (s.snippet as string) || "",
+              domain:
+                s.url && typeof s.url === "string"
+                  ? new URL(s.url).hostname
+                  : undefined,
+            });
+          });
+        }
+      } catch {
+        // Silently continue if extraction fails
+      }
+
+      return {
+        provider: "perplexity",
+        response: parsed,
+        metadata: { structuredResult, textResult, region },
+        sources,
+        citations,
+        searchQueries,
+        groundingMetadata: {
+          structured: structuredResult as unknown as Record<string, unknown>,
+          text: textResult as unknown as Record<string, unknown>,
+        },
+      };
+    }
+
+    // Fallback to text generation if structured output fails
+    const result = await generateText({
+      model: perplexity("sonar-pro"),
+      maxTokens: 5000,
+      prompt,
+    });
+
+    // Parse the text response as JSON to get structured results
+    let parsed: typeof searchResultsSchema._type;
+    try {
+      parsed = searchResultsSchema.parse(JSON.parse(result.text));
+    } catch {
+      // If parsing fails, create a single result from the response
+      parsed = [
+        {
+          title: "Perplexity Response",
+          url: "https://perplexity.ai",
+          snippet: result.text.slice(0, 100) + "...",
+        },
+      ];
+    }
+
+    // Extract sources from Perplexity response
+    const sources: Source[] = [];
+    const citations: Array<{
+      text: string;
+      sourceIndices: number[];
+      confidence?: number;
+    }> = [];
+    const searchQueries: string[] = [];
+
+    try {
+      // Access Perplexity-specific sources
+      if (result.sources && Array.isArray(result.sources)) {
+        result.sources.forEach((source: unknown) => {
+          const s = source as Record<string, unknown>;
+          sources.push({
+            title: (s.title as string) || "",
+            url: (s.url as string) || "",
+            snippet: (s.snippet as string) || "",
+            domain:
+              s.url && typeof s.url === "string"
+                ? new URL(s.url).hostname
+                : undefined,
+          });
+        });
+      }
+    } catch {
+      // Silently continue if extraction fails
+    }
+
+    return {
+      provider: "perplexity",
+      response: parsed,
+      metadata: { result, region },
+      sources,
+      citations,
+      searchQueries,
+      groundingMetadata: result as unknown as Record<string, unknown>,
+    };
+  } catch (error) {
+    return {
+      provider: "perplexity",
+      response: [],
+      metadata: {},
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
 const claudeSchema = {
   type: "object" as const,
   properties: {
@@ -357,33 +610,35 @@ export async function processPromptWithClaude(
   region: string
 ): Promise<LLMResponse> {
   try {
-    const result = await anthropic.messages.create({
-      model: "claude-3-7-sonnet-latest",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: 5000,
-      tools: [
-        {
-          type: "web_search_20250305",
-          name: "web_search",
-          user_location: {
-            type: "approximate",
-            region,
+    const result = await retryWithBackoff(() =>
+      anthropic.messages.create({
+        model: "claude-3-7-sonnet-latest",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
           },
-          max_uses: 5,
-        },
-        {
-          name: "format_search_results",
-          description: "Format search results into structured JSON",
-          input_schema: claudeSchema,
-        },
-      ],
-      tool_choice: { type: "tool", name: "format_search_results" },
-    });
+        ],
+        max_tokens: 5000,
+        tools: [
+          {
+            type: "web_search_20250305",
+            name: "web_search",
+            user_location: {
+              type: "approximate",
+              region,
+            },
+            max_uses: 5,
+          },
+          {
+            name: "format_search_results",
+            description: "Format search results into structured JSON",
+            input_schema: claudeSchema,
+          },
+        ],
+        tool_choice: { type: "tool", name: "format_search_results" },
+      })
+    );
 
     const formatted = result.content.find((block) => block.type === "tool_use");
 
@@ -460,11 +715,16 @@ export async function processPromptWithClaude(
       groundingMetadata: result.content as unknown as Record<string, unknown>,
     };
   } catch (error) {
+    // Enhanced error logging for Claude
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    console.error(`Claude API call failed after all retries:`, errorMessage);
+
     return {
       provider: "claude",
       response: [],
-      metadata: {},
-      error: error instanceof Error ? error.message : "Unknown error",
+      metadata: { error: errorMessage },
+      error: `Claude API error: ${errorMessage}`,
     };
   }
 }
@@ -477,6 +737,7 @@ export async function processPromptWithAllProviders(
   const promises = [
     processPromptWithOpenAI(searchPrompt, region),
     processPromptWithGoogle(searchPrompt, region),
+    processPromptWithPerplexity(searchPrompt, region),
     processPromptWithClaude(searchPrompt, region),
   ];
 

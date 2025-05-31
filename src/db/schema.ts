@@ -81,7 +81,12 @@ export const topics = pgTable("topics", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const modelEnum = pgEnum("model", ["openai", "claude", "google"]);
+export const modelEnum = pgEnum("model", [
+  "openai",
+  "claude",
+  "google",
+  "perplexity",
+]);
 
 export const geoRegionEnum = pgEnum("geo_region", [
   "global",

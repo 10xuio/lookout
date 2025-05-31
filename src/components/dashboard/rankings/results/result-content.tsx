@@ -24,6 +24,7 @@ const MODEL_DISPLAY_NAMES: Record<string, string> = {
   openai: "ChatGPT",
   claude: "Claude",
   google: "Gemini",
+  perplexity: "Perplexity",
 } as const;
 
 const STATUS_BADGE_VARIANTS: Record<

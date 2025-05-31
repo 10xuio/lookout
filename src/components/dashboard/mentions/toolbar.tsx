@@ -3,12 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, RotateCcw } from "lucide-react";
 import { useState } from "react";
-import { useParams } from "next/navigation";
 import { toast } from "sonner";
 
-function ProcessMentionsButton() {
+function ProcessMentionsButton({ topicId }: { topicId?: string }) {
   const [currentStatus, setCurrentStatus] = useState("idle");
-  const { topicId } = useParams();
 
   const handleProcess = async () => {
     try {
@@ -68,10 +66,10 @@ function ProcessMentionsButton() {
   );
 }
 
-export function MentionsToolbar() {
+export function MentionsToolbar({ topicId }: { topicId?: string }) {
   return (
     <div className="flex items-center gap-2 justify-end">
-      <ProcessMentionsButton />
+      <ProcessMentionsButton topicId={topicId} />
     </div>
   );
 }

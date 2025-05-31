@@ -4,15 +4,50 @@ import { prompts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { waitUntil } from "@vercel/functions";
 import { processInBackground } from "@/lib/background/rankings";
+import { checkUsageLimit } from "@/lib/subscription";
+import { auth } from "@/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const { promptId } = await request.json();
 
     if (!promptId) {
       return NextResponse.json(
         { error: "Prompt ID is required" },
         { status: 400 }
+      );
+    }
+
+    // Check usage limits before processing
+    const usageCheck = await checkUsageLimit(session.user.id);
+
+    if (!usageCheck.canProcess) {
+      const message =
+        usageCheck.limit === -1
+          ? "Your subscription is not active"
+          : `Usage limit exceeded. You've used ${usageCheck.currentUsage}/${usageCheck.limit} prompts this month. Upgrade your plan to process more prompts.`;
+
+      return NextResponse.json(
+        {
+          error: "Usage limit exceeded",
+          message,
+          currentUsage: usageCheck.currentUsage,
+          limit: usageCheck.limit,
+          plan: usageCheck.plan,
+        },
+        { status: 403 }
       );
     }
 
@@ -25,6 +60,14 @@ export async function POST(request: NextRequest) {
 
     if (!prompt) {
       return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
+    }
+
+    // Check if user owns this prompt
+    if (prompt.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Unauthorized access to prompt" },
+        { status: 403 }
+      );
     }
 
     if (prompt.status === "processing") {
@@ -57,6 +100,11 @@ export async function POST(request: NextRequest) {
       message: "Prompt processing started",
       promptId,
       status: "processing",
+      usage: {
+        current: usageCheck.currentUsage + 1, // +1 for the current request
+        limit: usageCheck.limit,
+        plan: usageCheck.plan,
+      },
     });
   } catch (error) {
     console.error("API Error:", error);

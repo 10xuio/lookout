@@ -5,6 +5,7 @@ import { getUser } from "@/auth/server";
 import type { Topic } from "@/types/topic";
 import { revalidatePath } from "next/cache";
 import { cleanUrl } from "@/lib/utils";
+import { checkTopicLimit } from "@/lib/subscription";
 
 export async function deleteTopic(topicId: string) {
   const user = await getUser();
@@ -55,6 +56,16 @@ export async function createTopicFromUrl(
   try {
     const user = await getUser();
     if (!user) throw new Error("User not found");
+
+    // Check topic limits before creating
+    const topicCheck = await checkTopicLimit(user.id);
+
+    if (!topicCheck.canCreateTopic) {
+      return {
+        success: false,
+        error: `You've reached your limit of ${topicCheck.limit} topics. Upgrade your plan to track more topics.`,
+      };
+    }
 
     const domain = cleanUrl(data.url);
     const name = domain.split(".")[0];

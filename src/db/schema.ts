@@ -26,6 +26,13 @@ export const user = pgTable("user", {
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => new Date())
     .notNull(),
+  // Stripe subscription fields
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  stripePriceId: text("stripe_price_id"),
+  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
+  plan: text("plan").notNull().default("free"), // free, pro, enterprise
+  planStatus: text("plan_status").notNull().default("active"), // active, canceled, past_due
 });
 
 export const session = pgTable("session", {

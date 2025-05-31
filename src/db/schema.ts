@@ -148,7 +148,6 @@ export const modelResults = pgTable(
       .notNull()
       .references(() => prompts.id, { onDelete: "cascade" }),
     model: modelEnum("model").notNull(),
-    response: text("response"),
     responseMetadata: jsonb("response_metadata").notNull().default({}),
     status: status("status").notNull().default("pending"),
     errorMessage: text("error_message"),

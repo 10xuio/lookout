@@ -134,8 +134,6 @@ export async function processUserMentions(userId: string, topicId?: string) {
         return { success: true, processed: 0, mentionsFound: 0 };
       }
 
-      await tx.delete(mentions).where(inArray(mentions.promptId, promptIds));
-
       const queue = new PQueue({
         concurrency: PARALLEL_BATCHES,
         interval: 1000,
@@ -172,11 +170,11 @@ export async function processUserMentions(userId: string, topicId?: string) {
               const batchMentions: MentionInsert[] = [];
 
               for (const result of results) {
-                if (!result.response || !result.prompt) continue;
+                if (!result.results || !result.prompt) continue;
 
                 try {
                   const detectedMentions = await detectMentionsInResponse(
-                    result.response,
+                    JSON.stringify(result.results),
                     result.prompt.topic.name,
                     result.prompt.topic.description ?? ""
                   );
@@ -200,6 +198,10 @@ export async function processUserMentions(userId: string, topicId?: string) {
                   console.error(`Error processing result ${result.id}:`, error);
                 }
               }
+
+              await tx
+                .delete(mentions)
+                .where(inArray(mentions.promptId, promptIds));
 
               const INSERT_CHUNK_SIZE = 100;
               for (

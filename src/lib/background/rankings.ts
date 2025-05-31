@@ -34,7 +34,6 @@ export async function processInBackground(
     const dbOperations = results.map((result) => ({
       promptId,
       model: result.provider,
-      response: JSON.stringify(result.response),
       responseMetadata: result.metadata,
       status: result.error ? "failed" : ("completed" as Status),
       errorMessage: result.error ?? null,

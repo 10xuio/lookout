@@ -25,7 +25,7 @@ export function LoginForm({
       setIsLoading(true);
       await signIn.social({
         provider: "google",
-        callbackURL: "/dashboard/topics",
+        callbackURL: "/dashboard",
       });
     } catch (error) {
       console.error(error);
@@ -40,6 +40,7 @@ export function LoginForm({
         <CardHeader className="text-center flex flex-col items-center">
           <a
             href="https://lookout.so"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 self-center font-medium mb-2"
           >
             <Image

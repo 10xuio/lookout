@@ -1,0 +1,1 @@
+ALTER TABLE "prompt_results" DROP COLUMN "response";

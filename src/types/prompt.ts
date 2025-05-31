@@ -6,7 +6,6 @@ export type LLMResult = Pick<
   typeof modelResults.$inferSelect,
   | "id"
   | "model"
-  | "response"
   | "status"
   | "errorMessage"
   | "completedAt"

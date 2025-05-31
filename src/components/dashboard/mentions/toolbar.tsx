@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Status } from "@/types/prompt";
 
 function ProcessMentionsButton({ topicId }: { topicId?: string }) {
-  const [currentStatus, setCurrentStatus] = useState("idle");
+  const [currentStatus, setCurrentStatus] = useState<Status>("pending");
 
   const handleProcess = async () => {
     try {

@@ -140,7 +140,7 @@ function StepContainer({
           )}
         </div>
 
-        {children && !step.isComplete && (
+        {children && !step.isComplete && !step.isLocked && (
           <div
             className={cn(
               "p-6 border-t",

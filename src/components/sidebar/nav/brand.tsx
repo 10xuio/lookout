@@ -15,7 +15,7 @@ export function BrandComp() {
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg mr-1">
             <Image
-              src={`/logo-sq.png`}
+              src="/logo-sq.png"
               alt="Lookout"
               className="size-8 object-contain rounded-lg"
               width={50}

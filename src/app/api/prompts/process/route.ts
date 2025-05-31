@@ -1,24 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { prompts } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { waitUntil } from "@vercel/functions";
 import { processInBackground } from "@/lib/background/rankings";
 import { checkUsageLimit } from "@/lib/subscription";
-import { auth } from "@/auth";
+import { getUser } from "@/auth/server";
 
 export async function POST(request: NextRequest) {
   try {
-    // Get authenticated user
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const authUser = await getUser();
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { promptId } = await request.json();
@@ -30,8 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check usage limits before processing
-    const usageCheck = await checkUsageLimit(session.user.id);
+    const usageCheck = await checkUsageLimit(authUser.id);
 
     if (!usageCheck.canProcess) {
       const message =
@@ -52,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const prompt = await db.query.prompts.findFirst({
-      where: eq(prompts.id, promptId),
+      where: and(eq(prompts.id, promptId), eq(prompts.userId, authUser.id)),
       with: {
         topic: true,
       },
@@ -60,14 +53,6 @@ export async function POST(request: NextRequest) {
 
     if (!prompt) {
       return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
-    }
-
-    // Check if user owns this prompt
-    if (prompt.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Unauthorized access to prompt" },
-        { status: 403 }
-      );
     }
 
     if (prompt.status === "processing") {
@@ -101,7 +86,7 @@ export async function POST(request: NextRequest) {
       promptId,
       status: "processing",
       usage: {
-        current: usageCheck.currentUsage + 1, // +1 for the current request
+        current: usageCheck.currentUsage + 1,
         limit: usageCheck.limit,
         plan: usageCheck.plan,
       },

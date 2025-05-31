@@ -13,11 +13,11 @@ export function BrandComp() {
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <div className="flex aspect-square size-10 items-center justify-center rounded-lg mr-1">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg mr-1">
             <Image
-              src={`/logo.png`}
+              src={`/logo-sq.png`}
               alt="Lookout"
-              className="size-10 object-contain rounded-md"
+              className="size-8 object-contain rounded-lg"
               width={50}
               height={50}
             />

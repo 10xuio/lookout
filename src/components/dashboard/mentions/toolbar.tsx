@@ -1,23 +1,77 @@
-import { LoadingButton } from "@/components/loading-button";
-import { analyzeMentions } from "./actions";
-import { Stats } from "./stats";
-import { RefreshCw } from "lucide-react";
+"use client";
 
-export async function MentionsToolbar({ topicId }: { topicId?: string }) {
-  const handleRefresh = async () => {
-    "use server";
-    await analyzeMentions();
+import { Button } from "@/components/ui/button";
+import { Loader2, RefreshCw, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { toast } from "sonner";
+
+function ProcessMentionsButton() {
+  const [currentStatus, setCurrentStatus] = useState("idle");
+  const { topicId } = useParams();
+
+  const handleProcess = async () => {
+    try {
+      setCurrentStatus("processing");
+
+      const response = await fetch("/api/analyze-mentions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topicId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Failed to process mentions");
+      }
+
+      toast.success("Mentions refresh started, this may take a few minutes");
+      setCurrentStatus("completed");
+    } catch (error) {
+      console.error("Failed to process mentions:", error);
+      toast.error("Failed to process mentions");
+      setCurrentStatus("failed");
+    }
   };
 
+  if (currentStatus === "processing") {
+    return (
+      <Button aria-label="Processing" variant="outline" size="sm" disabled>
+        <Loader2 className="h-4 w-4 animate-spin" /> Processing...
+      </Button>
+    );
+  }
+
+  if (currentStatus === "failed") {
+    return (
+      <Button
+        aria-label="Retry"
+        variant="outline"
+        size="sm"
+        onClick={handleProcess}
+      >
+        <RotateCcw className="h-4 w-4" /> Retry
+      </Button>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <form action={handleRefresh} className="flex justify-end">
-        <LoadingButton>
-          <RefreshCw className="h-4 w-4" />
-          Refresh Analysis
-        </LoadingButton>
-      </form>
-      <Stats topicId={topicId} />
+    <Button
+      aria-label="Process mentions"
+      variant="outline"
+      size="sm"
+      onClick={handleProcess}
+    >
+      <RefreshCw className="h-4 w-4" /> Process Mentions
+    </Button>
+  );
+}
+
+export function MentionsToolbar() {
+  return (
+    <div className="flex items-center gap-2 justify-end">
+      <ProcessMentionsButton />
     </div>
   );
 }

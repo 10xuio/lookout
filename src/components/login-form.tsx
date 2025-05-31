@@ -36,18 +36,18 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader className="text-center flex flex-col gap-2 items-center">
+      <Card className="rounded-lg">
+        <CardHeader className="text-center flex flex-col items-center">
           <a
             href="https://lookout.so"
-            className="flex items-center gap-2 self-center font-medium"
+            className="flex items-center gap-2 self-center font-medium mb-2"
           >
             <Image
-              src="/logo.png"
+              src="/logo-sq.png"
               alt="Lookout"
               width={100}
               height={100}
-              className="rounded-md"
+              className="rounded-lg size-15"
             />
           </a>
           <CardTitle className="text-xl">Welcome to Lookout!</CardTitle>

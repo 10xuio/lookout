@@ -1,13 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { createTopicFromUrl } from "@/components/dashboard";
-import { Tag } from "lucide-react";
 
-interface TopicStepProps {
-  isComplete?: boolean;
-}
-
-export function TopicStep({ isComplete = false }: TopicStepProps) {
+export function TopicStep() {
   async function handleSubmit(formData: FormData) {
     "use server";
 
@@ -16,20 +11,6 @@ export function TopicStep({ isComplete = false }: TopicStepProps) {
     if (!url?.trim()) return;
 
     await createTopicFromUrl({ url: url.trim() });
-  }
-
-  if (isComplete) {
-    return (
-      <div className="text-center space-y-1">
-        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-          <Tag className="h-6 w-6 text-primary" />
-        </div>
-        <h2 className="text-xl font-semibold">Topic Added</h2>
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Your website has been successfully added and analyzed
-        </p>
-      </div>
-    );
   }
 
   return (
@@ -44,7 +25,7 @@ export function TopicStep({ isComplete = false }: TopicStepProps) {
           type="url"
           placeholder="https://google.com"
           required
-          className="h-12"
+          className="h-12 mt-2"
         />
         <p className="text-xs text-muted-foreground">
           We&apos;ll use this to understand your brand and competitive landscape

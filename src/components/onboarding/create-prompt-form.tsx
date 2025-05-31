@@ -25,7 +25,7 @@ export function CreatePromptForm({ topicId }: CreatePromptFormProps) {
     <form action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="content" className="text-sm font-medium">
-          Prompt Content
+          Create a Custom Prompt
         </label>
         <Textarea
           id="content"
@@ -33,7 +33,7 @@ export function CreatePromptForm({ topicId }: CreatePromptFormProps) {
           placeholder="e.g., Best accounting software for small business"
           required
           rows={3}
-          className="resize-none"
+          className="resize-none mt-2"
         />
         <p className="text-xs text-muted-foreground">
           Enter a prompt you want to track for AI ranking performance

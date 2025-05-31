@@ -1,4 +1,4 @@
-import { PLANS, PlanType } from "@/lib/stripe";
+import { PLANS, PlanType } from "@/lib/stripe/server";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,6 +11,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { createCheckoutSession } from "@/app/actions/stripe";
+import { cn } from "@/lib/utils";
+import { LoadingButton } from "./loading-button";
 
 interface PricingProps {
   currentPlan?: PlanType;
@@ -19,23 +21,23 @@ interface PricingProps {
 
 export function Pricing({
   currentPlan = "free",
-  currentUsage = 0,
+  currentUsage = 10,
 }: PricingProps) {
   return (
-    <div className="container mx-auto py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
-        <p className="text-lg text-muted-foreground">
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 container mx-auto py-8">
+      <div className="flex flex-col gap-2 items-center mb-8">
+        <h1 className="text-2xl font-bold">Choose Your Plan</h1>
+        <p className="text-md text-muted-foreground">
           Scale your AI ranking monitoring with the perfect plan for your needs
         </p>
         {currentUsage > 0 && (
-          <Badge variant="outline" className="mt-4">
+          <Badge variant="outline">
             Current usage: {currentUsage} prompts this month
           </Badge>
         )}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <div className="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
         {Object.entries(PLANS).map(([key, plan]) => {
           const planKey = key as PlanType;
           const isCurrentPlan = planKey === currentPlan;
@@ -44,12 +46,13 @@ export function Pricing({
           return (
             <Card
               key={planKey}
-              className={`relative ${
-                isPopular ? "border-primary shadow-lg" : ""
-              }`}
+              className={cn(
+                "relative flex flex-col shadow-none",
+                isPopular && "border-orange-600 shadow-lg"
+              )}
             >
               {isPopular && (
-                <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-orange-600 text-white">
                   Most Popular
                 </Badge>
               )}
@@ -64,7 +67,7 @@ export function Pricing({
                 </CardDescription>
               </CardHeader>
 
-              <CardContent>
+              <CardContent className="flex-1">
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-2">
@@ -89,9 +92,15 @@ export function Pricing({
                     action={createCheckoutSession.bind(null, planKey)}
                     className="w-full"
                   >
-                    <Button type="submit" className="w-full">
+                    <LoadingButton
+                      className={cn(
+                        "w-full",
+                        isPopular &&
+                          "bg-orange-600 hover:bg-orange-700 text-white hover:text-white border-none"
+                      )}
+                    >
                       Upgrade to {plan.name}
-                    </Button>
+                    </LoadingButton>
                   </form>
                 )}
               </CardFooter>

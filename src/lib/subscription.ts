@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { user, prompts, topics } from "@/db/schema";
 import { eq, and, gte, count } from "drizzle-orm";
-import { PLANS, PlanType } from "./stripe";
+import { PLANS, PlanType } from "./stripe/server";
 
 export interface UserSubscription {
   plan: PlanType;
@@ -53,7 +53,6 @@ export async function checkUsageLimit(userId: string): Promise<{
     };
   }
 
-  // Check if subscription is active
   if (subscription.planStatus !== "active") {
     return {
       canProcess: false,
@@ -65,7 +64,6 @@ export async function checkUsageLimit(userId: string): Promise<{
     };
   }
 
-  // For free plan, use monthly limit
   if (subscription.plan === "free") {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -88,7 +86,6 @@ export async function checkUsageLimit(userId: string): Promise<{
     };
   }
 
-  // For basic and pro plans, use daily limit
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -118,9 +115,7 @@ export async function getAvailableProviders(userId: string): Promise<string[]> {
   return [...subscription.limits.providers];
 }
 
-export function getProcessingPriority(
-  plan: PlanType
-): "low" | "normal" | "high" {
+export function getProcessingPriority(plan: PlanType) {
   return PLANS[plan].limits.priority;
 }
 
@@ -141,7 +136,6 @@ export async function checkTopicLimit(userId: string): Promise<{
     };
   }
 
-  // Check if subscription is active
   if (subscription.planStatus !== "active") {
     return {
       canCreateTopic: false,
@@ -151,7 +145,6 @@ export async function checkTopicLimit(userId: string): Promise<{
     };
   }
 
-  // Count current active topics for the user
   const [topicCount] = await db
     .select({ count: count() })
     .from(topics)

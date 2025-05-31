@@ -29,7 +29,7 @@ import { db } from "@/db";
 import { user as userSchema } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { UpgradeButton } from "@/components/upgrade-button";
-import { PlanType } from "@/lib/stripe";
+import { PlanType } from "@/lib/stripe/server";
 
 async function NavUserAsync() {
   const session = await auth.api.getSession({

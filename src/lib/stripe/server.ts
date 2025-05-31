@@ -1,27 +1,27 @@
 import Stripe from "stripe";
-import { loadStripe, Stripe as StripeJS } from "@stripe/stripe-js";
 
-// Server-side Stripe instance
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-05-28.basil",
-  typescript: true,
+let stripeInstance: Stripe | null = null;
+
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    if (!stripeInstance) {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        throw new Error("STRIPE_SECRET_KEY is not set");
+      }
+      stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: "2025-05-28.basil",
+        typescript: true,
+      });
+    }
+    return Reflect.get(stripeInstance, prop, stripeInstance);
+  },
 });
 
-// Client-side Stripe instance (for frontend)
-let stripePromise: Promise<StripeJS | null> | null = null;
-export const getStripe = () => {
-  if (!stripePromise) {
-    stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-  }
-  return stripePromise;
-};
-
-// Plan configuration - should match your Stripe products
 export const PLANS = {
   free: {
     name: "Free",
     price: 0,
-    priceId: "", // No price ID for free plan
+    priceId: "",
     features: [
       "5 prompts per month",
       "Basic AI provider (OpenAI only)",
@@ -29,7 +29,7 @@ export const PLANS = {
       "Basic analytics",
     ],
     limits: {
-      promptsPerDay: 0, // No daily prompts for free
+      promptsPerDay: 0,
       promptsPerMonth: -1,
       topicsLimit: 1,
       providers: ["openai"],
@@ -37,7 +37,7 @@ export const PLANS = {
     },
   },
   basic: {
-    name: "Lookout Basic",
+    name: "Basic",
     price: 50,
     priceId: process.env.STRIPE_BASIC_PRICE_ID!,
     features: [
@@ -56,7 +56,7 @@ export const PLANS = {
     },
   },
   pro: {
-    name: "Lookout Pro",
+    name: "Professional",
     price: 100,
     priceId: process.env.STRIPE_PRO_PRICE_ID!,
     features: [

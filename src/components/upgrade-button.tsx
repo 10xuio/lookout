@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { createCheckoutSession } from "@/app/actions/stripe";
-import { PlanType } from "@/lib/stripe";
+import { PlanType } from "@/lib/stripe/server";
 
 interface UpgradeButtonProps {
   planType: PlanType;

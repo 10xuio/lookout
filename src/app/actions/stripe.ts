@@ -1,6 +1,6 @@
 "use server";
 
-import { stripe, PLANS, isPlanType } from "@/lib/stripe";
+import { stripe, PLANS, isPlanType } from "@/lib/stripe/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";

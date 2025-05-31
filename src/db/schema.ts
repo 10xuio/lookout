@@ -12,6 +12,8 @@ import {
 import { relations } from "drizzle-orm";
 import { SearchResult, Source } from "@/lib/llm";
 
+export const planEnum = pgEnum("plan", ["free", "basic", "pro", "enterprise"]);
+
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -26,13 +28,12 @@ export const user = pgTable("user", {
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => new Date())
     .notNull(),
-  // Stripe subscription fields
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   stripePriceId: text("stripe_price_id"),
   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
-  plan: text("plan").notNull().default("free"), // free, pro, enterprise
-  planStatus: text("plan_status").notNull().default("active"), // active, canceled, past_due
+  plan: planEnum("plan").notNull().default("free"),
+  planStatus: text("plan_status").notNull().default("active"),
 });
 
 export const session = pgTable("session", {

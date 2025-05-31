@@ -49,7 +49,7 @@ export const PLANS = {
     ],
     limits: {
       promptsPerDay: 25,
-      promptsPerMonth: -1, // Unlimited monthly (daily limit applies)
+      promptsPerMonth: -1,
       topicsLimit: 5,
       providers: ["openai", "claude", "google"],
       priority: "normal",
@@ -70,12 +70,16 @@ export const PLANS = {
     ],
     limits: {
       promptsPerDay: 100,
-      promptsPerMonth: -1, // Unlimited monthly (daily limit applies)
+      promptsPerMonth: -1,
       topicsLimit: 10,
       providers: ["openai", "claude", "google"],
       priority: "high",
     },
   },
 } as const;
+
+export function isPlanType(value: unknown): value is PlanType {
+  return typeof value === "string" && value in PLANS;
+}
 
 export type PlanType = keyof typeof PLANS;

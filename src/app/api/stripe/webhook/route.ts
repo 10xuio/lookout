@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { PlanType, stripe } from "@/lib/stripe";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -33,25 +32,25 @@ export async function POST(request: NextRequest) {
   try {
     switch (event.type) {
       case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object;
         await handleCheckoutCompleted(session);
         break;
       }
 
       case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription;
+        const subscription = event.data.object;
         await handleSubscriptionUpdated(subscription);
         break;
       }
 
       case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription;
+        const subscription = event.data.object;
         await handleSubscriptionDeleted(subscription);
         break;
       }
 
       case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice;
+        const invoice = event.data.object;
         await handlePaymentFailed(invoice);
         break;
       }
@@ -76,46 +75,70 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  const customerId = session.customer as string;
-  const subscriptionId = session.subscription as string;
+  const customerId = session.customer;
+  const subscriptionId = session.subscription;
 
-  // Get full subscription details
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  const priceId = subscription.items.data[0]?.price.id;
-
-  if (!priceId) {
-    console.error("No price ID found in subscription");
+  if (typeof customerId !== "string" || typeof subscriptionId !== "string") {
+    console.error("Invalid customer or subscription in checkout session");
     return;
   }
 
-  // Determine plan type from price ID
-  let planType = "free";
-  if (priceId === process.env.STRIPE_BASIC_PRICE_ID) {
-    planType = "basic";
-  } else if (priceId === process.env.STRIPE_PRO_PRICE_ID) {
-    planType = "pro";
+  let subscription: Stripe.Response<Stripe.Subscription>;
+
+  try {
+    subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  } catch (error) {
+    console.error("Error retrieving subscription:", error);
+    return;
   }
 
-  await db
-    .update(user)
-    .set({
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionId,
-      stripePriceId: priceId,
-      stripeCurrentPeriodEnd: new Date(
-        (subscription as any).current_period_end * 1000
-      ),
-      plan: planType,
-      planStatus: "active",
-      updatedAt: new Date(),
-    })
-    .where(eq(user.stripeCustomerId, customerId));
+  try {
+    const priceId = subscription.items.data[0]?.price.id;
 
-  console.log(`User upgraded to ${planType} plan`);
+    if (!priceId) {
+      console.error("No price ID found in subscription");
+      return;
+    }
+
+    let planType: PlanType = "free";
+    if (priceId === process.env.STRIPE_BASIC_PRICE_ID) {
+      planType = "basic";
+    } else if (priceId === process.env.STRIPE_PRO_PRICE_ID) {
+      planType = "pro";
+    }
+
+    const currentPeriodEnd = subscription.items.data[0]?.current_period_end;
+
+    await db
+      .update(user)
+      .set({
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: subscriptionId,
+        stripePriceId: priceId,
+        stripeCurrentPeriodEnd: currentPeriodEnd
+          ? new Date(currentPeriodEnd * 1000)
+          : null,
+        plan: planType,
+        planStatus: "active",
+        updatedAt: new Date(),
+      })
+      .where(eq(user.stripeCustomerId, customerId));
+
+    console.log(`User upgraded to ${planType} plan`);
+  } catch (error) {
+    console.error("Error retrieving subscription:", error);
+    return;
+  }
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  const customerId = subscription.customer as string;
+  const customerId = subscription.customer;
+
+  if (typeof customerId !== "string") {
+    console.error("Invalid customer in subscription");
+    return;
+  }
+
   const priceId = subscription.items.data[0]?.price.id;
 
   if (!priceId) {
@@ -123,60 +146,86 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     return;
   }
 
-  // Determine plan type from price ID
-  let planType = "free";
+  let planType: PlanType = "free";
   if (priceId === process.env.STRIPE_BASIC_PRICE_ID) {
     planType = "basic";
   } else if (priceId === process.env.STRIPE_PRO_PRICE_ID) {
     planType = "pro";
   }
 
-  await db
-    .update(user)
-    .set({
-      stripeSubscriptionId: subscription.id,
-      stripePriceId: priceId,
-      stripeCurrentPeriodEnd: new Date(
-        (subscription as any).current_period_end * 1000
-      ),
-      plan: planType,
-      planStatus:
-        subscription.status === "active" ? "active" : subscription.status,
-      updatedAt: new Date(),
-    })
-    .where(eq(user.stripeCustomerId, customerId));
+  try {
+    const currentPeriodEnd = subscription.items.data[0]?.current_period_end;
 
-  console.log(`Subscription updated for customer ${customerId}`);
+    await db
+      .update(user)
+      .set({
+        stripeSubscriptionId: subscription.id,
+        stripePriceId: priceId,
+        stripeCurrentPeriodEnd: currentPeriodEnd
+          ? new Date(currentPeriodEnd * 1000)
+          : null,
+        plan: planType,
+        planStatus:
+          subscription.status === "active" ? "active" : subscription.status,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.stripeCustomerId, customerId));
+
+    console.log(`Subscription updated for customer ${customerId}`);
+  } catch (error) {
+    console.error("Error updating subscription:", error);
+    return;
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const customerId = subscription.customer as string;
+  const customerId = subscription.customer;
 
-  await db
-    .update(user)
-    .set({
-      stripeSubscriptionId: null,
-      stripePriceId: null,
-      stripeCurrentPeriodEnd: null,
-      plan: "free",
-      planStatus: "canceled",
-      updatedAt: new Date(),
-    })
-    .where(eq(user.stripeCustomerId, customerId));
+  if (typeof customerId !== "string") {
+    console.error("Invalid customer in subscription");
+    return;
+  }
 
-  console.log(`Subscription canceled for customer ${customerId}`);
+  try {
+    await db
+      .update(user)
+      .set({
+        stripeSubscriptionId: null,
+        stripePriceId: null,
+        stripeCurrentPeriodEnd: null,
+        plan: "free",
+        planStatus: "canceled",
+        updatedAt: new Date(),
+      })
+      .where(eq(user.stripeCustomerId, customerId));
+
+    console.log(`Subscription canceled for customer ${customerId}`);
+  } catch (error) {
+    console.error("Error canceling subscription:", error);
+    return;
+  }
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const customerId = invoice.customer as string;
+  const customerId = invoice.customer;
 
-  await db
-    .update(user)
-    .set({
-      planStatus: "past_due",
-      updatedAt: new Date(),
-    })
-    .where(eq(user.stripeCustomerId, customerId));
+  if (typeof customerId !== "string") {
+    console.error("Invalid customer in invoice");
+    return;
+  }
 
-  console.log(`Payment failed for customer ${customerId}`);
+  try {
+    await db
+      .update(user)
+      .set({
+        planStatus: "past_due",
+        updatedAt: new Date(),
+      })
+      .where(eq(user.stripeCustomerId, customerId));
+
+    console.log(`Payment failed for customer ${customerId}`);
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    return;
+  }
 }

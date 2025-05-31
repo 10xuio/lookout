@@ -29,7 +29,7 @@ import { db } from "@/db";
 import { user as userSchema } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { UpgradeButton } from "@/components/upgrade-button";
-import { Badge } from "@/components/ui/badge";
+import { PlanType } from "@/lib/stripe";
 
 async function NavUserAsync() {
   const session = await auth.api.getSession({
@@ -61,13 +61,7 @@ export function NavUserComp({
 }: {
   user: typeof userSchema.$inferSelect;
 }) {
-  const currentPlan = user.plan as "free" | "basic" | "pro";
-  const planNames = {
-    free: "Free",
-    basic: "Lookout Basic",
-    pro: "Lookout Pro",
-  };
-
+  const currentPlan: PlanType = user.plan;
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -107,21 +101,18 @@ export function NavUserComp({
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
-                  <Badge variant="outline" className="w-fit mt-1 text-xs">
-                    {planNames[currentPlan]}
-                  </Badge>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {currentPlan !== "pro" && (
+              {!["pro", "enterprise"].includes(currentPlan) && (
                 <DropdownMenuItem asChild>
                   <UpgradeButton
                     planType={currentPlan === "free" ? "basic" : "pro"}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start h-auto p-2 font-normal"
+                    className="w-full justify-start h-auto font-normal"
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
                     {currentPlan === "free"

@@ -76,6 +76,25 @@ export const PLANS = {
       priority: "high",
     },
   },
+  enterprise: {
+    name: "Enterprise",
+    price: 1000,
+    priceId: "",
+    features: [
+      "Unlimited prompts per day",
+      "Unlimited topics or brands",
+      "All AI providers",
+      "Highest priority processing",
+      "Advanced analytics & reporting",
+    ],
+    limits: {
+      promptsPerDay: -1,
+      promptsPerMonth: -1,
+      topicsLimit: -1,
+      providers: ["openai", "claude", "google"],
+      priority: "highest",
+    },
+  },
 } as const;
 
 export function isPlanType(value: unknown): value is PlanType {

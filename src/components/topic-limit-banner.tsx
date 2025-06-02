@@ -61,7 +61,6 @@ export async function TopicLimitBanner() {
     );
   }
 
-  // Show current usage for free and basic users
   if (topicLimit.plan === "free" || topicLimit.plan === "basic") {
     return (
       <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md mb-4">

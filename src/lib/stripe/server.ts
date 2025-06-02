@@ -2,6 +2,8 @@ import Stripe from "stripe";
 
 let stripeInstance: Stripe | null = null;
 
+export type { Stripe };
+
 export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
     if (!stripeInstance) {

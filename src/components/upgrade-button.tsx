@@ -1,6 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { createCheckoutSession } from "@/app/actions/stripe";
 import { PlanType } from "@/lib/stripe/server";
+import { cn } from "@/lib/utils";
+import { LoadingButton } from "./loading-button";
 
 interface UpgradeButtonProps {
   planType: PlanType;
@@ -23,16 +24,22 @@ export function UpgradeButton({
   size = "default",
   className,
 }: UpgradeButtonProps) {
-  if (planType === "free") {
-    return null; // Don't show upgrade button for free plan
-  }
+  if (planType === "free") return null;
 
   return (
-    <form action={createCheckoutSession.bind(null, planType)}>
-      <Button type="submit" variant={variant} size={size} className={className}>
-        {children ||
+    <form
+      action={createCheckoutSession.bind(null, planType)}
+      className="w-full"
+    >
+      <LoadingButton
+        type="submit"
+        variant={variant}
+        size={size}
+        className={cn("w-full justify-start gap-2", className)}
+      >
+        {children ??
           `Upgrade to ${planType.charAt(0).toUpperCase() + planType.slice(1)}`}
-      </Button>
+      </LoadingButton>
     </form>
   );
 }

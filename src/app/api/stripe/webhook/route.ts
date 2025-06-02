@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PlanType, stripe } from "@/lib/stripe/server";
+import { PlanType, stripe, type Stripe } from "@/lib/stripe/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();

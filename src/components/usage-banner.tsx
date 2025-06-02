@@ -16,7 +16,6 @@ export async function UsageBanner() {
 
   const usage = await checkUsageLimit(session.user.id);
 
-  // Don't show for unlimited monthly plans with daily limits
   if (usage.limit === -1) {
     return null;
   }
@@ -25,7 +24,6 @@ export async function UsageBanner() {
   const isNearLimit = usagePercentage >= 80;
   const isAtLimit = !usage.canProcess;
 
-  // Determine if we're showing daily or monthly usage
   const isDaily = usage.plan === "basic" || usage.plan === "pro";
   const timeframe = isDaily ? "today" : "this month";
 

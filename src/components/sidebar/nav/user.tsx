@@ -1,10 +1,4 @@
-import {
-  BadgeCheck,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
+import { ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -30,6 +24,8 @@ import { user as userSchema } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { UpgradeButton } from "@/components/upgrade-button";
 import { PlanType } from "@/lib/stripe/server";
+import { manageSubscription } from "@/app/actions/stripe";
+import { LoadingButton } from "@/components/loading-button";
 
 async function NavUserAsync() {
   const session = await auth.api.getSession({
@@ -105,32 +101,38 @@ export function NavUserComp({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {!["pro", "enterprise"].includes(currentPlan) && (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="p-0">
+                    <UpgradeButton
+                      planType={currentPlan === "free" ? "basic" : "pro"}
+                      size="sm"
+                      variant="ghost"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {currentPlan === "free"
+                        ? "Upgrade to Basic"
+                        : "Upgrade to Pro"}
+                    </UpgradeButton>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuGroup>
-              {!["pro", "enterprise"].includes(currentPlan) && (
-                <DropdownMenuItem asChild>
-                  <UpgradeButton
-                    planType={currentPlan === "free" ? "basic" : "pro"}
+              <DropdownMenuItem className="p-0">
+                <form action={manageSubscription} className="w-full">
+                  <LoadingButton
+                    type="submit"
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start h-auto font-normal"
+                    className="w-full justify-start gap-2"
                   >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {currentPlan === "free"
-                      ? "Upgrade to Basic"
-                      : "Upgrade to Pro"}
-                  </UpgradeButton>
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+                    <CreditCard className="h-4 w-4" />
+                    Manage Subscription
+                  </LoadingButton>
+                </form>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

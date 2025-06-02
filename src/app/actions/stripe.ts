@@ -7,6 +7,29 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getUser } from "@/auth/server";
 
+export async function manageSubscription() {
+  const authUser = await getUser();
+
+  if (!authUser) {
+    throw new Error("User not found");
+  }
+
+  if (!authUser.stripeCustomerId) {
+    throw new Error("User has no stripe customer id");
+  }
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: authUser.stripeCustomerId,
+    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/rankings`,
+  });
+
+  if (!session.url) {
+    throw new Error("Failed to create billing portal session");
+  }
+
+  redirect(session.url);
+}
+
 export async function createCheckoutSession(planType: string) {
   let checkoutUrl: string;
 

@@ -4,6 +4,7 @@ import { prompts } from "@/db/schema";
 import { getUser } from "@/auth/server";
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
+import { headers } from "next/headers";
 
 export async function deletePrompt(promptId: string) {
   const user = await getUser();
@@ -96,6 +97,27 @@ export async function createPrompt(
         status: "pending",
       })
       .returning({ id: prompts.id });
+
+    const startProcessing = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/prompts/process`,
+      {
+        method: "POST",
+        body: JSON.stringify({ promptId: newPrompt.id }),
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: (await headers()).get("cookie") ?? "",
+        },
+      }
+    );
+
+    if (!startProcessing.ok) {
+      console.error(
+        "Failed to start processing:",
+        await startProcessing.json()
+      );
+    } else {
+      console.log("Started processing in background");
+    }
 
     revalidatePath("/dashboard/prompts");
 

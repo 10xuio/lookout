@@ -1,4 +1,4 @@
-import { AtSign, BicepsFlexed, Bot, Tag, BarChart3 } from "lucide-react";
+import { AtSign, BicepsFlexed, Bot, Tag } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -11,11 +11,6 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
 const staticNavMain = [
-  {
-    title: "Dashboard",
-    icon: BarChart3,
-    url: "/dashboard/main",
-  },
   {
     title: "Topics",
     icon: Tag,

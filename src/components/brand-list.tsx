@@ -8,16 +8,29 @@ interface BrandListProps {
   className?: string;
 }
 
-export function ImageAvatar({ url, title }: { url: string; title: string }) {
+export function ImageAvatar({
+  url,
+  title,
+  size = 80,
+  className,
+}: {
+  url: string;
+  title: string;
+  size?: number;
+  className?: string;
+}) {
   const link = cleanUrl(url);
   if (link) {
     return (
       <Image
         src={`https://img.logo.dev/${link}?token=${config.logoDevApi}&size=80&retina=true`}
         alt={title}
-        className="w-6.5 h-6.5 border border-gray-200 rounded object-cover"
-        width={80}
-        height={80}
+        className={cn(
+          "w-6.5 h-6.5 border border-gray-200 rounded object-cover",
+          className
+        )}
+        width={size}
+        height={size}
       />
     );
   }

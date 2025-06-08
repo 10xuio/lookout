@@ -1,7 +1,7 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { AtSign, Eye, Trash2 } from "lucide-react";
+import { AtSign, ChartAreaIcon, Eye, Trash2 } from "lucide-react";
 import Link from "next/link";
 import type { Topic } from "@/types/topic";
 import { ImageAvatar } from "@/components/brand-list";
@@ -37,6 +37,11 @@ export function TopicTableRow({ topic }: TopicTableRowProps) {
       <TableCell>{topic.isActive ? "Active" : "Inactive"}</TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
+          <Link href={`/dashboard/topics/${topic.id}`}>
+            <Button variant="outline" size="sm" className="gap-2">
+              <ChartAreaIcon aria-label="View dashboard" className="h-4 w-4" />
+            </Button>
+          </Link>
           <Link href={`/dashboard/rankings/${topic.id}`}>
             <Button variant="outline" size="sm" className="gap-2">
               <Eye aria-label="View rankings" className="h-4 w-4" />

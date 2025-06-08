@@ -15,7 +15,7 @@ export async function TopicSelectorWrapper({ topicId }: { topicId?: string }) {
   const topics = await getTopics();
   return (
     <TopicSelectLogo
-      url="/dashboard/main"
+      url="/dashboard/topics"
       topics={topics}
       currentTopicId={topicId}
     />

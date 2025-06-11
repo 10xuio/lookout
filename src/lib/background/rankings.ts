@@ -31,6 +31,8 @@ export async function processInBackground(
       `Processing timeout for prompt ${promptId}`
     );
 
+    const successfulResults = results.filter(result => !result.error);
+
     const dbOperations = results.map((result) => ({
       promptId,
       model: result.provider,
@@ -77,6 +79,10 @@ export async function processInBackground(
 
     const overallStatus = successCount > 0 ? "completed" : "failed";
     const visibilityScore = getVisibilityScore(allResults, topicName);
+
+    console.log(
+      `Prompt ${promptId} processing summary: ${successCount} successful, ${failureCount} failed providers`
+    );
 
     await db
       .update(prompts)

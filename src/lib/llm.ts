@@ -475,11 +475,59 @@ export async function processPromptWithAllProviders(
   region: string
 ): Promise<LLMResponse[]> {
   const searchPrompt = createSearchPrompt(prompt, region);
+  
+  const PROVIDER_TIMEOUT = 60000; // 60 seconds per provider
+  
+  const createTimeoutPromise = <T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    providerName: string
+  ): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(
+          () => reject(new Error(`${providerName} provider timeout after ${timeoutMs}ms`)),
+          timeoutMs
+        )
+      ),
+    ]);
+  };
+
   const promises = [
-    processPromptWithOpenAI(searchPrompt, region),
-    processPromptWithGoogle(searchPrompt, region),
-    processPromptWithClaude(searchPrompt, region),
+    createTimeoutPromise(
+      processPromptWithOpenAI(searchPrompt, region),
+      PROVIDER_TIMEOUT,
+      "OpenAI"
+    ),
+    createTimeoutPromise(
+      processPromptWithGoogle(searchPrompt, region),
+      PROVIDER_TIMEOUT,
+      "Google"
+    ),
+    createTimeoutPromise(
+      processPromptWithClaude(searchPrompt, region),
+      PROVIDER_TIMEOUT,
+      "Claude"
+    ),
   ];
 
-  return Promise.all(promises);
+  const results = await Promise.allSettled(promises);
+  
+  return results.map((result, index) => {
+    const providerNames = ["openai", "claude", "google"] as const;
+    const provider = providerNames[index];
+    
+    if (result.status === "fulfilled") {
+      return result.value;
+    } else {
+      console.error(`${provider} provider failed:`, result.reason);
+      return {
+        provider,
+        response: [],
+        metadata: {},
+        error: result.reason instanceof Error ? result.reason.message : "Provider failed",
+      };
+    }
+  });
 }
